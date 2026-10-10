@@ -8,7 +8,11 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
-/** Result of [FileProjectRepository.scan]. */
+/**
+ * Result of [FileProjectRepository.scan]. The library screen does not use it: it lists projects through
+ * [ProjectRepository.list] and shows no skipped count. It is public so the count the data spec requires
+ * is observable by diagnostics and tests.
+ */
 data class ProjectScan(
     /** Readable projects, most recently updated first. */
     val projects: List<StickerProject>,
@@ -51,7 +55,10 @@ class FileProjectRepository(
         (readDocument(files, json, id) as? DocumentState.Readable)?.project
     }
 
-    /** Reads every project folder and counts the ones that are skipped. Sorted like [list]. */
+    /**
+     * Reads every project folder and counts the ones that are skipped. Sorted like [list]. The UI does
+     * not call this; [list] gives it the same projects without the count.
+     */
     suspend fun scan(): ProjectScan = withContext(Dispatchers.IO) {
         val projects = ArrayList<StickerProject>()
         var skipped = 0

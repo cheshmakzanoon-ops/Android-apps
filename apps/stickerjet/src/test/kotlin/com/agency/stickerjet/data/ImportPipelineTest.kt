@@ -1,5 +1,7 @@
 package com.agency.stickerjet.data
 
+import com.agency.stickerjet.domain.ImportFailure
+import com.agency.stickerjet.domain.ImportOutcome
 import com.agency.stickerjet.domain.ImportRejection
 import com.agency.stickerjet.domain.StickerLimits
 import com.agency.stickerjet.domain.StickerProjects

@@ -151,12 +151,10 @@ class FileProjectRepository(files: ProjectFiles, json: Json, clock: () -> Long) 
 class ImportService(resolver: ContentResolver, files: ProjectFiles, clock: () -> Long) {
     suspend fun import(uri: Uri, projectId: String): ImportOutcome
 }
-sealed interface ImportOutcome {
-    data class Imported(val project: StickerProject) : ImportOutcome
-    data class Rejected(val reason: ImportRejection) : ImportOutcome
-    data class Failed(val cause: ImportFailure) : ImportOutcome   // access revoked, no space, I/O error
-}
-enum class ImportFailure { ACCESS_REVOKED, LOW_STORAGE, IO_ERROR }
+// ImportOutcome and ImportFailure live in `domain` (com.agency.stickerjet.domain, file domain/ImportOutcome.kt),
+// not in `data`, so `ui` can match on them without importing `data`. Same names and shapes as the domain file:
+// sealed interface ImportOutcome { Imported(project), Rejected(reason: ImportRejection), Failed(cause: ImportFailure) }
+// enum class ImportFailure { ACCESS_REVOKED, LOW_STORAGE, IO_ERROR }
 class StorageGuard(root: File) { fun hasRoomFor(bytes: Long): Boolean }
 class LibraryCleaner(files: ProjectFiles, repository: ProjectRepository) {
     suspend fun clearTemporaryFiles()

@@ -1,6 +1,8 @@
 package com.agency.stickerjet.data
 
 import com.agency.stickerjet.domain.ImportDecision
+import com.agency.stickerjet.domain.ImportFailure
+import com.agency.stickerjet.domain.ImportOutcome
 import com.agency.stickerjet.domain.ImportPolicy
 import com.agency.stickerjet.domain.ImportRejection
 import com.agency.stickerjet.domain.ProjectRepository

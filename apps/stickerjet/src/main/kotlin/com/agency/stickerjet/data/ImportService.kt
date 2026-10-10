@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
+import com.agency.stickerjet.domain.ImportOutcome
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream

@@ -29,22 +29,25 @@ internal sealed interface EnvelopeResult {
  * [CURRENT_VERSION] before its project is decoded, so each step only needs to know one schema. Unknown
  * keys are ignored by the Json configuration, which lets a version add fields without a migration.
  */
-internal object ProjectEnvelope {
-    const val CURRENT_VERSION: Int = 1
-    const val KEY_VERSION: String = "schemaVersion"
-    const val KEY_PROJECT: String = "project"
+object ProjectEnvelope {
+    internal const val CURRENT_VERSION: Int = 1
+    internal const val KEY_VERSION: String = "schemaVersion"
+    internal const val KEY_PROJECT: String = "project"
 
     /** Empty while version 1 is the only schema. Add `1 to { ... }` here when version 2 ships. */
-    val MIGRATIONS: Map<Int, EnvelopeMigration> = emptyMap()
+    internal val MIGRATIONS: Map<Int, EnvelopeMigration> = emptyMap()
 
-    /** The configuration every project document is written and read with. */
+    /**
+     * The Json configuration every project document is written and read with. Share one instance
+     * per app, or create it with this function, so the composition root and the tests agree.
+     */
     fun createJson(): Json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
 
     /** Serializes [project] inside the envelope at [CURRENT_VERSION]. */
-    fun encode(json: Json, project: StickerProject): String =
+    internal fun encode(json: Json, project: StickerProject): String =
         buildJsonObject {
             put(KEY_VERSION, JsonPrimitive(CURRENT_VERSION))
             put(KEY_PROJECT, json.encodeToJsonElement(StickerProject.serializer(), project))
@@ -54,7 +57,7 @@ internal object ProjectEnvelope {
      * Decodes [text], upgrading it through [migrations] up to [currentVersion]. A document whose
      * version is above [currentVersion] is reported as [EnvelopeResult.NewerSchema] and not decoded.
      */
-    fun decode(
+    internal fun decode(
         json: Json,
         text: String,
         currentVersion: Int = CURRENT_VERSION,

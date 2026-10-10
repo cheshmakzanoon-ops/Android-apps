@@ -1,7 +1,4 @@
-package com.agency.stickerjet.data
-
-import com.agency.stickerjet.domain.ImportRejection
-import com.agency.stickerjet.domain.StickerProject
+package com.agency.stickerjet.domain
 
 /** Result of [ImportService.import]. Only [Imported] leaves files behind. */
 sealed interface ImportOutcome {

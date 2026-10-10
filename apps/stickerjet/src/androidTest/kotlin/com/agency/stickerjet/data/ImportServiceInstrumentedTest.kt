@@ -3,6 +3,8 @@ package com.agency.stickerjet.data
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.agency.stickerjet.domain.ImportFailure
+import com.agency.stickerjet.domain.ImportOutcome
 import com.agency.stickerjet.domain.ImportRejection
 import java.io.File
 import java.util.UUID

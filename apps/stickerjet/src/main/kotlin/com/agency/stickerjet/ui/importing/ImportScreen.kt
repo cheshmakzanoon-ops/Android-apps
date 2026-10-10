@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.agency.stickerjet.R
 import com.agency.stickerjet.domain.StickerLimits
-import com.agency.stickerjet.ui.common.StickerFormat
 import com.agency.stickerjet.ui.components.LoadingPanel
 import com.agency.stickerjet.ui.components.StatusKind
 import com.agency.stickerjet.ui.components.StatusPanel
