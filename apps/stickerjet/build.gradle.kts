@@ -98,6 +98,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.mlkit.segmentation.selfie)
+    // The data layer decodes project documents with Json. Core keeps this implementation-only, so the
+    // app declares it too, or its compile classpath has no kotlinx.serialization.json.
+    implementation(libs.kotlinx.serialization.json)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
@@ -111,6 +114,4 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    // The journey builds the same Json as the composition root; core keeps it implementation-only.
-    androidTestImplementation(libs.kotlinx.serialization.json)
 }

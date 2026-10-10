@@ -13,7 +13,7 @@ import androidx.compose.runtime.rememberUpdatedState
  * Returns a function that opens the system video picker and reports the result to [onPicked].
  *
  * - Uses the Photo Picker (`PickVisualMedia`) with `VideoOnly` when the device provides one.
- * - Otherwise falls back to `GetContent("video/*")`, which opens the system document picker.
+ * - Otherwise falls back to `GetContent` with the video MIME wildcard, which opens the document picker.
  * - Requests no runtime permission. Both paths hand back a per-file read grant only.
  * - `onPicked(null)` means the user cancelled. It is not an error.
  *

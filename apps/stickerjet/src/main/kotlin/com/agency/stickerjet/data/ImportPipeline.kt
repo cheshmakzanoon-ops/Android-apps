@@ -53,6 +53,7 @@ internal class ImportPipeline(
         files.inFlight.add(projectId)
         try {
             dir.deleteRecursively() // remnants of an earlier attempt with the same id
+            if (!dir.mkdirs() && !dir.isDirectory) return@withContext ImportOutcome.Failed(ImportFailure.IO_ERROR)
             val outcome = execute(projectId, clip)
             if (outcome !is ImportOutcome.Imported) dir.deleteRecursively()
             outcome
@@ -71,11 +72,20 @@ internal class ImportPipeline(
         if (declared != null && declared > maxSourceBytes) return ImportOutcome.Rejected(ImportRejection.TOO_LARGE)
         if (!storage.hasRoomFor(declared ?: maxSourceBytes)) return ImportOutcome.Failed(ImportFailure.LOW_STORAGE)
 
-        val source = files.sourceFile(projectId)
-        val copy = try {
-            clip.openStream().use { input -> copyWithLimit(input, source, maxSourceBytes) }
+        // Opening the provider's stream is where revoked access shows. Errors while writing our own
+        // file are not access problems, so they are classified separately below.
+        val input = try {
+            clip.openStream()
         } catch (e: FileNotFoundException) {
             return ImportOutcome.Failed(ImportFailure.ACCESS_REVOKED)
+        } catch (e: SecurityException) {
+            return ImportOutcome.Failed(ImportFailure.ACCESS_REVOKED)
+        } catch (e: IOException) {
+            return ImportOutcome.Failed(ImportFailure.IO_ERROR)
+        }
+        val source = files.sourceFile(projectId)
+        val copy = try {
+            input.use { stream -> copyWithLimit(stream, source, maxSourceBytes) }
         } catch (e: SecurityException) {
             return ImportOutcome.Failed(ImportFailure.ACCESS_REVOKED)
         } catch (e: IOException) {

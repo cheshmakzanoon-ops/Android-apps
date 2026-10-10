@@ -13,6 +13,7 @@ import com.agency.stickerjet.data.FileProjectRepository
 import com.agency.stickerjet.data.ImportFailure
 import com.agency.stickerjet.data.ImportOutcome
 import com.agency.stickerjet.data.ImportService
+import com.agency.stickerjet.data.ProjectEnvelope
 import com.agency.stickerjet.data.ProjectFiles
 import com.agency.stickerjet.domain.ExportPlan
 import com.agency.stickerjet.domain.ImportRejection
@@ -30,7 +31,6 @@ import com.agency.stickerjet.platform.ExportSharing
 import com.agency.stickerjet.platform.H264Capability
 import com.agency.stickerjet.platform.H264DecodeCapability
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -90,12 +90,11 @@ class StickerJourneyTest {
 
     private val clock: () -> Long = { System.currentTimeMillis() }
 
-    // Must match the Json configuration of the composition root. Keep the two in step.
-    private val json = Json { ignoreUnknownKeys = true }
-
     private val runRoot: File = File(context.filesDir, "journey-test/${UUID.randomUUID()}")
     private val files = ProjectFiles(File(runRoot, "projects"))
-    private val repository = FileProjectRepository(files, json, clock)
+
+    // The same Json factory ImportService uses, so documents written by one are read by the other.
+    private val repository = FileProjectRepository(files, ProjectEnvelope.createJson(), clock)
     private val importService = ImportService(context.contentResolver, files, clock)
     private val exporter = StickerExporter(
         frames = MediaFrameSource { projectId -> files.sourceFile(projectId) },
@@ -199,7 +198,7 @@ class StickerJourneyTest {
         assertNotNull("share chooser resolves to no activity", chooser.resolveActivity(context.packageManager))
 
         // Reopen from disk: the export is recorded on the project.
-        val reopened = FileProjectRepository(files, json, clock).load(projectId)
+        val reopened = FileProjectRepository(files, ProjectEnvelope.createJson(), clock).load(projectId)
             ?: throw AssertionError("project not readable after export")
         assertTrue(reopened.exports.any { it.fileName == exported.name })
 

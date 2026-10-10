@@ -5,6 +5,11 @@
     {
       "file": "lossless_alpha_48.webp",
       "size_bytes": 696,
+      "top_chunks": [
+        "VP8L"
+      ],
+      "anmf_subchunks": [],
+      "alph_present": false,
       "width": 48,
       "height": 48,
       "mode": "RGBA",
@@ -20,8 +25,61 @@
       ]
     },
     {
+      "file": "lossless_alpha_64.webp",
+      "size_bytes": 830,
+      "top_chunks": [
+        "VP8L"
+      ],
+      "anmf_subchunks": [],
+      "alph_present": false,
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA",
+      "n_frames": 1,
+      "is_animated": false,
+      "durations_ms": [],
+      "loop": null,
+      "alpha_min_max_per_frame": [
+        [
+          0,
+          255
+        ]
+      ]
+    },
+    {
       "file": "lossy_alpha_64.webp",
       "size_bytes": 1132,
+      "top_chunks": [
+        "VP8X",
+        "ALPH",
+        "VP8 "
+      ],
+      "anmf_subchunks": [],
+      "alph_present": true,
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA",
+      "n_frames": 1,
+      "is_animated": false,
+      "durations_ms": [],
+      "loop": null,
+      "alpha_min_max_per_frame": [
+        [
+          0,
+          255
+        ]
+      ]
+    },
+    {
+      "file": "lossy_alpha_64_b.webp",
+      "size_bytes": 1072,
+      "top_chunks": [
+        "VP8X",
+        "ALPH",
+        "VP8 "
+      ],
+      "anmf_subchunks": [],
+      "alph_present": true,
       "width": 64,
       "height": 64,
       "mode": "RGBA",
@@ -39,6 +97,13 @@
     {
       "file": "lossy_alpha_odd_33x17.webp",
       "size_bytes": 456,
+      "top_chunks": [
+        "VP8X",
+        "ALPH",
+        "VP8 "
+      ],
+      "anmf_subchunks": [],
+      "alph_present": true,
       "width": 33,
       "height": 17,
       "mode": "RGBA",
@@ -56,6 +121,22 @@
     {
       "file": "pil_animated_3f.webp",
       "size_bytes": 3212,
+      "top_chunks": [
+        "VP8X",
+        "ANIM",
+        "ANMF",
+        "ANMF",
+        "ANMF"
+      ],
+      "anmf_subchunks": [
+        "ALPH",
+        "VP8 ",
+        "ALPH",
+        "VP8 ",
+        "ALPH",
+        "VP8 "
+      ],
+      "alph_present": true,
       "width": 64,
       "height": 64,
       "mode": "RGBA",
@@ -85,6 +166,17 @@
     {
       "file": "pil_animated_lossless_2f.webp",
       "size_bytes": 1380,
+      "top_chunks": [
+        "VP8X",
+        "ANIM",
+        "ANMF",
+        "ANMF"
+      ],
+      "anmf_subchunks": [
+        "VP8L",
+        "VP8L"
+      ],
+      "alph_present": false,
       "width": 32,
       "height": 32,
       "mode": "RGBA",

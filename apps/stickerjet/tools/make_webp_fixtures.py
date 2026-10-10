@@ -5,6 +5,8 @@ Writes into core/src/test/resources/webp/ (default):
   lossy_alpha_64.webp          still, VP8X + ALPH + VP8 (lossy with alpha)
   lossy_alpha_odd_33x17.webp   still, odd bitstream size (exercises chunk padding)
   lossless_alpha_48.webp       still, VP8L
+  lossy_alpha_64_b.webp        still, 64x64 lossy with alpha, different phase (animation frame)
+  lossless_alpha_64.webp       still, 64x64 VP8L (animation frame of the writer tests)
   pil_animated_3f.webp         PIL save_all, 3 lossy frames, durations 100/200/300 ms, loop 0
   pil_animated_lossless_2f.webp PIL save_all, 2 lossless frames, durations 40/60 ms, loop 3
   expected.json                what Pillow reports for every fixture (the test oracle)
@@ -42,6 +44,28 @@ def frame(size, phase):
     return img
 
 
+def chunk_walk(path):
+    """Independent RIFF walk (no Pillow): returns top-level FourCCs and every ANMF sub-chunk FourCC."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    top, subs = [], []
+    at, end = 12, len(data)
+    while at < end:
+        fourcc = data[at:at + 4].decode("ascii")
+        size = int.from_bytes(data[at + 4:at + 8], "little")
+        payload = at + 8
+        top.append(fourcc)
+        if fourcc == "ANMF":
+            sat, send = payload + 16, payload + size
+            while sat < send:
+                sf = data[sat:sat + 4].decode("ascii")
+                ss = int.from_bytes(data[sat + 4:sat + 8], "little")
+                subs.append(sf)
+                sat = sat + 8 + ss + (ss & 1)
+        at = payload + size + (size & 1)
+    return top, subs
+
+
 def describe_pil(path):
     im = Image.open(path)
     n = getattr(im, "n_frames", 1)
@@ -51,9 +75,13 @@ def describe_pil(path):
         rgba = im.convert("RGBA")
         durations.append(im.info.get("duration") if n > 1 else None)
         alpha_ranges.append(list(rgba.getchannel("A").getextrema()))
+    top, subs = chunk_walk(path)
     return {
         "file": os.path.basename(path),
         "size_bytes": os.path.getsize(path),
+        "top_chunks": top,
+        "anmf_subchunks": subs,
+        "alph_present": "ALPH" in top or "ALPH" in subs,
         "width": im.size[0],
         "height": im.size[1],
         "mode": im.mode,
@@ -72,6 +100,8 @@ def main():
     made["lossy_alpha_64.webp"] = frame((64, 64), 0.0)
     made["lossy_alpha_odd_33x17.webp"] = frame((33, 17), 1.0)
     made["lossless_alpha_48.webp"] = frame((48, 48), 2.0)
+    made["lossy_alpha_64_b.webp"] = frame((64, 64), 3.0)
+    made["lossless_alpha_64.webp"] = frame((64, 64), 4.0)
 
     anim3 = [frame((64, 64), p) for p in (0.0, 1.0, 2.0)]
     anim2 = [frame((32, 32), p) for p in (0.5, 1.5)]
@@ -93,7 +123,8 @@ def main():
                   duration=[40, 60], loop=3, lossless=True)
 
     report = {"generator": "tools/make_webp_fixtures.py", "pillow": Image.__version__, "fixtures": []}
-    for name in sorted(list(made.keys()) + ["pil_animated_3f.webp", "pil_animated_lossless_2f.webp"]):
+    names = sorted(list(made.keys()) + ["pil_animated_3f.webp", "pil_animated_lossless_2f.webp"])
+    for name in names:
         report["fixtures"].append(describe_pil(os.path.join(FIXTURE_DIR, name)))
     with open(os.path.join(FIXTURE_DIR, "expected.json"), "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=2)

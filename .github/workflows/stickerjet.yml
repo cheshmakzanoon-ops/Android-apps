@@ -205,7 +205,7 @@ jobs:
           fi
           test -f apps/stickerjet/tools/verify_animated_webp.py || { echo "verify_animated_webp.py is missing (SJ-D4 deliverable)"; exit 1; }
           python -m pip install --quiet "Pillow==12.3.0"
-          python apps/stickerjet/tools/verify_animated_webp.py "$export_file"
+          python -I apps/stickerjet/tools/verify_animated_webp.py "$export_file"
       - name: Upload the exported sticker
         if: always()
         uses: actions/upload-artifact@v4
