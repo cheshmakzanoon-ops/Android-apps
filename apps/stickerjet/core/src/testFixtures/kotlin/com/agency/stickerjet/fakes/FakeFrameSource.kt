@@ -12,7 +12,7 @@ import kotlin.math.min
  * square that moves left to right once every [PERIOD_MS]. The same inputs always give the same pixels,
  * so tests can compare frames.
  *
- * The source file name is ignored. Frames are rendered one at a time as the flow is collected, and none
+ * The project id is ignored, so every project gets the same synthetic clip. Frames are rendered one at a time as the flow is collected, and none
  * are kept, which mirrors the real streaming contract. The longest side is scaled down to `maxSidePx`
  * with the aspect ratio kept, the same as the real source.
  */
@@ -25,7 +25,7 @@ class FakeFrameSource(
         require(sourceWidth > 0 && sourceHeight > 0) { "Source dimensions must be positive" }
     }
 
-    override fun frames(sourceFileName: String, timestampsMs: List<Long>, maxSidePx: Int): Flow<ArgbFrame> {
+    override fun frames(projectId: String, timestampsMs: List<Long>, maxSidePx: Int): Flow<ArgbFrame> {
         require(maxSidePx > 0) { "maxSidePx must be positive" }
         val longest = max(sourceWidth, sourceHeight)
         val width = if (longest <= maxSidePx) sourceWidth else scaled(sourceWidth, maxSidePx, longest)

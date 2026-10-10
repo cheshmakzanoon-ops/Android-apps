@@ -32,9 +32,14 @@ class ArgbFrame(
     }
 }
 
-/** Streams frames of a stored source clip at the requested timestamps, longest side ≤ [maxSidePx]. */
+/**
+ * Streams frames of a stored source clip at the requested timestamps, longest side ≤ [maxSidePx].
+ *
+ * [projectId] identifies the project whose source clip is read. The adapter maps the id to the stored
+ * source file (for example `projects/<projectId>/source.mp4`), so callers never handle file names or URIs.
+ */
 interface FrameSource {
-    fun frames(sourceFileName: String, timestampsMs: List<Long>, maxSidePx: Int): Flow<ArgbFrame>
+    fun frames(projectId: String, timestampsMs: List<Long>, maxSidePx: Int): Flow<ArgbFrame>
 }
 
 /** Per-pixel foreground confidence, 0..255, row-major, [width] * [height] entries. */
