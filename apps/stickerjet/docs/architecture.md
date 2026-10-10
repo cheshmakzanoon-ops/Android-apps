@@ -74,11 +74,21 @@ sealed interface ImportDecision {
 object ImportPolicy { fun evaluate(probe: ProbeResult): ImportDecision }   // oriented size swaps for 90/270
 
 object ExportPlan {
+    /** Frame count: max(1, round(durationMs * FPS / 1000)). */
+    fun frameCount(trim: TrimRange): Int
     /** Timestamps of the frames in the loop: trim.startMs + i * 1000 / FPS, i in 0 until frameCount. */
     fun frameTimestampsMs(trim: TrimRange): List<Long>
     /** Integer durations that sum exactly to the loop length (83/84 ms at 12 fps). */
     fun frameDurationsMs(trim: TrimRange): IntArray
 }
+
+/** Edit rules, each returning a new project. Trim is clamped; the others reject invalid values. */
+fun StickerProject.withTrim(trim: TrimRange, nowMs: Long): StickerProject
+fun StickerProject.withTransform(transform: Transform, nowMs: Long): StickerProject
+fun StickerProject.withCaption(caption: Caption, nowMs: Long): StickerProject
+fun StickerProject.withBackground(background: BackgroundMode, nowMs: Long): StickerProject
+fun StickerProject.withStroke(stroke: MaskStroke, nowMs: Long): StickerProject
+fun StickerProject.withTitle(title: String, nowMs: Long): StickerProject
 
 class EditHistory<T>(initial: T, maxDepth: Int = 50) {
     val current: T; val canUndo: Boolean; val canRedo: Boolean
@@ -93,7 +103,11 @@ object StickerFileNamer {
 }
 
 object StickerProjects {
-    fun create(id: String, source: SourceVideo, nowMs: Long): StickerProject   // default trim, title from source
+    const val FALLBACK_TITLE: String = "Sticker"
+    /** Default trim; title from displayName (picked file's OpenableColumns.DISPLAY_NAME, extension dropped). */
+    fun create(id: String, source: SourceVideo, displayName: String, nowMs: Long): StickerProject
+    /** Trims whitespace, collapses runs of spaces, and falls back to FALLBACK_TITLE when empty. */
+    fun normalizeTitle(raw: String): String
 }
 ```
 

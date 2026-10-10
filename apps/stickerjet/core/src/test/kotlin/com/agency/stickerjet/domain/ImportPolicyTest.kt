@@ -59,6 +59,13 @@ class ImportPolicyTest {
     }
 
     @Test
+    fun negativeSizeIsUnreadableNotTooLarge() {
+        for (size in listOf(-1L, Long.MIN_VALUE)) {
+            assertEquals(rejected(ImportRejection.UNREADABLE), ImportPolicy.evaluate(probe(sizeBytes = size)), "size $size")
+        }
+    }
+
+    @Test
     fun unreadableIsReportedBeforeSizeAndLengthProblems() {
         val broken = probe(durationMs = null, width = 0, sizeBytes = 999L * megabyte)
         assertEquals(rejected(ImportRejection.UNREADABLE), ImportPolicy.evaluate(broken))

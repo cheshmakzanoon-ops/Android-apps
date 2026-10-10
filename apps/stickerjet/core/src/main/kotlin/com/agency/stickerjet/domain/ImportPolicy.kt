@@ -36,7 +36,7 @@ sealed interface ImportDecision {
  *
  * The checks run in this order, and the first failure is the reported reason:
  * 1. NOT_A_VIDEO: the file has no video track.
- * 2. UNREADABLE: duration, width or height is missing or not positive.
+ * 2. UNREADABLE: duration, width or height is missing or not positive, or sizeBytes is negative.
  * 3. TOO_SHORT: duration < [StickerLimits.MIN_STICKER_MS]. A clip of exactly the minimum is accepted.
  * 4. TOO_LONG: duration > [StickerLimits.MAX_SOURCE_MS]. A clip of exactly the maximum is accepted.
  * 5. TOO_LARGE: sizeBytes > [StickerLimits.MAX_SOURCE_BYTES]. A file of exactly the maximum is accepted.
@@ -54,7 +54,8 @@ object ImportPolicy {
         val height = probe.height
         if (duration == null || duration <= 0L ||
             width == null || width <= 0 ||
-            height == null || height <= 0
+            height == null || height <= 0 ||
+            probe.sizeBytes < 0L
         ) {
             return ImportDecision.Rejected(ImportRejection.UNREADABLE)
         }

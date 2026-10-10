@@ -23,7 +23,8 @@ class FixtureFakesTest {
 
     private fun project(id: String, title: String = "clip") = StickerProjects.create(
         id = id,
-        source = SourceVideo(fileName = "$title.mp4", durationMs = 10_000L, width = 640, height = 480, rotationDegrees = 0, sizeBytes = 1L),
+        source = SourceVideo(fileName = "source.mp4", durationMs = 10_000L, width = 640, height = 480, rotationDegrees = 0, sizeBytes = 1L),
+        displayName = "$title.mp4",
         nowMs = 1L,
     )
 

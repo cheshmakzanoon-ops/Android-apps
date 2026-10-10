@@ -1,0 +1,110 @@
+{
+  "generator": "tools/make_webp_fixtures.py",
+  "pillow": "12.3.0",
+  "fixtures": [
+    {
+      "file": "lossless_alpha_48.webp",
+      "size_bytes": 696,
+      "width": 48,
+      "height": 48,
+      "mode": "RGBA",
+      "n_frames": 1,
+      "is_animated": false,
+      "durations_ms": [],
+      "loop": null,
+      "alpha_min_max_per_frame": [
+        [
+          0,
+          255
+        ]
+      ]
+    },
+    {
+      "file": "lossy_alpha_64.webp",
+      "size_bytes": 1132,
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA",
+      "n_frames": 1,
+      "is_animated": false,
+      "durations_ms": [],
+      "loop": null,
+      "alpha_min_max_per_frame": [
+        [
+          0,
+          255
+        ]
+      ]
+    },
+    {
+      "file": "lossy_alpha_odd_33x17.webp",
+      "size_bytes": 456,
+      "width": 33,
+      "height": 17,
+      "mode": "RGBA",
+      "n_frames": 1,
+      "is_animated": false,
+      "durations_ms": [],
+      "loop": null,
+      "alpha_min_max_per_frame": [
+        [
+          0,
+          255
+        ]
+      ]
+    },
+    {
+      "file": "pil_animated_3f.webp",
+      "size_bytes": 3212,
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA",
+      "n_frames": 3,
+      "is_animated": true,
+      "durations_ms": [
+        100,
+        200,
+        300
+      ],
+      "loop": 0,
+      "alpha_min_max_per_frame": [
+        [
+          0,
+          255
+        ],
+        [
+          0,
+          255
+        ],
+        [
+          0,
+          255
+        ]
+      ]
+    },
+    {
+      "file": "pil_animated_lossless_2f.webp",
+      "size_bytes": 1380,
+      "width": 32,
+      "height": 32,
+      "mode": "RGBA",
+      "n_frames": 2,
+      "is_animated": true,
+      "durations_ms": [
+        40,
+        60
+      ],
+      "loop": 3,
+      "alpha_min_max_per_frame": [
+        [
+          0,
+          255
+        ],
+        [
+          0,
+          255
+        ]
+      ]
+    }
+  ]
+}

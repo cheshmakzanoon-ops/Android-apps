@@ -8,14 +8,17 @@ object StickerProjects {
 
     /**
      * A new project with the default trim from [TrimPolicy.defaultTrim], default transform, caption and
-     * background, no strokes or exports, and both timestamps set to [nowMs]. The title is the source file
-     * name without its directory and extension, normalized by [normalizeTitle].
+     * background, no strokes or exports, and both timestamps set to [nowMs].
+     *
+     * The title is [displayName] without its directory and extension, normalized by [normalizeTitle].
+     * [displayName] is the name the user picked (OpenableColumns.DISPLAY_NAME), not [SourceVideo.fileName],
+     * which names the stored copy and is always the same for every import.
      */
-    fun create(id: String, source: SourceVideo, nowMs: Long): StickerProject {
+    fun create(id: String, source: SourceVideo, displayName: String, nowMs: Long): StickerProject {
         require(id.isNotBlank()) { "Project id must not be blank" }
         return StickerProject(
             id = id,
-            title = normalizeTitle(stemOf(source.fileName)),
+            title = normalizeTitle(stemOf(displayName)),
             source = source,
             trim = TrimPolicy.defaultTrim(source.durationMs),
             createdAtMs = nowMs,

@@ -114,7 +114,7 @@ class EditHistoryTest {
     @Test
     fun worksWithProjectSnapshots() {
         val source = SourceVideo("clip.mp4", 10_000L, 640, 480, 0, 1L)
-        val first = StickerProjects.create("p", source, nowMs = 1L)
+        val first = StickerProjects.create("p", source, displayName = "clip.mp4", nowMs = 1L)
         val history = EditHistory(first)
         history.commit(first.withTitle("Renamed", nowMs = 2L))
         assertEquals("Renamed", history.current.title)

@@ -60,6 +60,9 @@ class ProjectFiles(
         const val EXPORTS_DIR_NAME: String = "exports"
         const val DOCUMENT_NAME: String = "project.json"
 
+        /** Name of the default temporary folder, see the class KDoc. */
+        const val DEFAULT_TEMP_FOLDER: String = "stickerjet-temp"
+
         private val ID_PATTERN = Regex("[A-Za-z0-9_-]{1,64}")
 
         /** True for ids that are safe to use as directory names. */

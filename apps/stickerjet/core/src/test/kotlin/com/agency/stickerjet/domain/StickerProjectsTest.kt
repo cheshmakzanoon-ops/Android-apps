@@ -10,11 +10,14 @@ class StickerProjectsTest {
     private fun source(fileName: String = "My clip.mp4", durationMs: Long = 10_000L) =
         SourceVideo(fileName = fileName, durationMs = durationMs, width = 640, height = 480, rotationDegrees = 0, sizeBytes = 1_000L)
 
-    private fun project(durationMs: Long = 10_000L) = StickerProjects.create("p1", source(durationMs = durationMs), nowMs = 100L)
+    private fun project(durationMs: Long = 10_000L) =
+        StickerProjects.create("p1", source(durationMs = durationMs), displayName = "My clip.mp4", nowMs = 100L)
+
+    private fun titleOf(displayName: String) = StickerProjects.create("p", source(), displayName, 1L).title
 
     @Test
     fun createSetsDefaultsFromTheSourceAndTheClock() {
-        val created = StickerProjects.create("p1", source(), nowMs = 100L)
+        val created = StickerProjects.create("p1", source(), displayName = "My clip.mp4", nowMs = 100L)
         assertEquals("p1", created.id)
         assertEquals("My clip", created.title)
         assertEquals(TrimRange(0, 2_000), created.trim)
@@ -29,27 +32,34 @@ class StickerProjectsTest {
 
     @Test
     fun createFromAShortSourceGivesTheFullSourceAsTrim() {
-        assertEquals(TrimRange(0, 300), StickerProjects.create("p1", source(durationMs = 300L), 1L).trim)
+        assertEquals(TrimRange(0, 300), StickerProjects.create("p1", source(durationMs = 300L), "short.mp4", 1L).trim)
     }
 
     @Test
-    fun titleIsTheFileNameWithoutDirectoryOrExtension() {
-        assertEquals("My clip.final", StickerProjects.create("p", source("clips/My clip.final.mp4"), 1L).title)
-        assertEquals("a.b.c", StickerProjects.create("p", source("a.b.c.mov"), 1L).title)
-        assertEquals("No extension", StickerProjects.create("p", source("No extension"), 1L).title)
+    fun titleIsTheDisplayNameWithoutItsExtension() {
+        assertEquals("My clip.final", titleOf("My clip.final.mp4"))
+        assertEquals("a.b.c", titleOf("a.b.c.mov"))
+        assertEquals("No extension", titleOf("No extension"))
+    }
+
+    @Test
+    fun titleComesFromTheDisplayNameNotTheStoredFileName() {
+        val created = StickerProjects.create("p", source(fileName = "source.mp4"), displayName = "Birthday party.mp4", nowMs = 1L)
+        assertEquals("Birthday party", created.title)
+        assertEquals("source.mp4", created.source.fileName)
     }
 
     @Test
     fun titleFallsBackToStickerWhenTheNameHasNoUsableStem() {
-        for (name in listOf(".mp4", "clips/.mp4", "   .mp4", "\t.mov")) {
-            assertEquals("Sticker", StickerProjects.create("p", source(name), 1L).title, "file name '$name'")
+        for (name in listOf("", ".mp4", "   .mp4", "\t.mov")) {
+            assertEquals("Sticker", titleOf(name), "display name '$name'")
         }
     }
 
     @Test
     fun titleKeepsUnicodeAndCollapsesWhitespace() {
-        assertEquals("Vidéo 🎬 final", StickerProjects.create("p", source("Vidéo \t 🎬   final.mp4"), 1L).title)
-        assertEquals("日本語", StickerProjects.create("p", source("日本語.mp4"), 1L).title)
+        assertEquals("Vidéo 🎬 final", titleOf("Vidéo \t 🎬   final.mp4"))
+        assertEquals("日本語", titleOf("日本語.mp4"))
     }
 
     @Test
@@ -61,7 +71,7 @@ class StickerProjectsTest {
 
     @Test
     fun createRejectsABlankId() {
-        assertFailsWith<IllegalArgumentException> { StickerProjects.create(" ", source(), 1L) }
+        assertFailsWith<IllegalArgumentException> { StickerProjects.create(" ", source(), "clip.mp4", 1L) }
     }
 
     @Test
