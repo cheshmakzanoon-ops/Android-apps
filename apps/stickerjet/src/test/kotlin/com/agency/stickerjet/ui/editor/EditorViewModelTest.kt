@@ -177,7 +177,10 @@ class EditorViewModelTest {
         // The still frame is 384x288 (480x360 scaled to the 384 px side limit), so the mask must match.
         val mask = AlphaMask(STILL_WIDTH, STILL_HEIGHT, ByteArray(STILL_WIDTH * STILL_HEIGHT))
         val vm = viewModel(segmenter = FakeSubjectSegmenter.fixed(mask))
-        runBlocking { vm.session.enterTab(EditorTab.SUBJECT) }
+        runBlocking {
+            vm.session.load()
+            vm.session.enterTab(EditorTab.SUBJECT)
+        }
         assertEquals(SubjectDetection.FOUND, vm.state.value.detection)
         assertEquals(0, vm.state.value.matte!!.pixels[0] ushr 24)
     }
