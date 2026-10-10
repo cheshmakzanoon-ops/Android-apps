@@ -1,0 +1,590 @@
+{
+  "ruleVersion": "1",
+  "description": "Golden vectors for the PhotoDuel tally. Kotlin ResultCalculator and the Node tally must both produce `expected` for every case. See docs/architecture.md section 8.",
+  "conventions": {
+    "roster": "Frozen roster at challenge start. Users are strings.",
+    "activeMembers": "Roster members who are still room members at voting close. Leaving is blocked during active challenges, so this equals the roster in normal play.",
+    "submissions": "Each submission has an author, and a status ACTIVE | WITHDRAWN | REMOVED | HIDDEN as of voting close.",
+    "blocks": "Unordered pairs. A ballot is void when voter and target author are blocked in either direction.",
+    "ballots": "Ballots in the order they were recorded. Only the first ballot per voter counts, because ballots are immutable.",
+    "rules": [
+      "P = ACTIVE submissions whose author is on the roster.",
+      "A ballot counts when: voter is in activeMembers, target is in P, voter is not the author of target, and the pair is not blocked.",
+      "If |P| < 2: INSUFFICIENT_SUBMISSIONS, ballotCount 0, tallies [].",
+      "Else if counted ballots < 2: INSUFFICIENT_BALLOTS, tallies for every P entry.",
+      "Else the maximum vote count decides: one leader is WINNER, several are TIE with all leaders as coWinnerSubmissionIds.",
+      "tallies and coWinnerSubmissionIds are sorted by submission id, ascending by string comparison."
+    ],
+    "coWinnerRule": "For WINNER, coWinnerSubmissionIds contains exactly the winner. For TIE it contains every leader. Otherwise it is empty."
+  },
+  "cases": [
+    {
+      "name": "winner_simple",
+      "roster": [
+        "a",
+        "b",
+        "c"
+      ],
+      "activeMembers": [
+        "a",
+        "b",
+        "c"
+      ],
+      "submissions": [
+        {
+          "id": "sa",
+          "author": "a",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sb",
+          "author": "b",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sc",
+          "author": "c",
+          "status": "ACTIVE"
+        }
+      ],
+      "blocks": [],
+      "ballots": [
+        {
+          "voter": "a",
+          "submission": "sb"
+        },
+        {
+          "voter": "b",
+          "submission": "sc"
+        },
+        {
+          "voter": "c",
+          "submission": "sb"
+        }
+      ],
+      "expected": {
+        "outcome": "WINNER",
+        "coWinnerSubmissionIds": [
+          "sb"
+        ],
+        "tallies": [
+          {
+            "submissionId": "sa",
+            "votes": 0
+          },
+          {
+            "submissionId": "sb",
+            "votes": 2
+          },
+          {
+            "submissionId": "sc",
+            "votes": 1
+          }
+        ],
+        "winnerSubmissionId": "sb",
+        "ballotCount": 3,
+        "eligibleVoterCount": 3
+      }
+    },
+    {
+      "name": "tie_two_way_is_co_winners",
+      "roster": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "activeMembers": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "submissions": [
+        {
+          "id": "sa",
+          "author": "a",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sb",
+          "author": "b",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sc",
+          "author": "c",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sd",
+          "author": "d",
+          "status": "ACTIVE"
+        }
+      ],
+      "blocks": [],
+      "ballots": [
+        {
+          "voter": "a",
+          "submission": "sc"
+        },
+        {
+          "voter": "b",
+          "submission": "sc"
+        },
+        {
+          "voter": "c",
+          "submission": "sd"
+        },
+        {
+          "voter": "d",
+          "submission": "sd"
+        }
+      ],
+      "expected": {
+        "outcome": "TIE",
+        "coWinnerSubmissionIds": [
+          "sc",
+          "sd"
+        ],
+        "tallies": [
+          {
+            "submissionId": "sa",
+            "votes": 0
+          },
+          {
+            "submissionId": "sb",
+            "votes": 0
+          },
+          {
+            "submissionId": "sc",
+            "votes": 2
+          },
+          {
+            "submissionId": "sd",
+            "votes": 2
+          }
+        ],
+        "winnerSubmissionId": null,
+        "ballotCount": 4,
+        "eligibleVoterCount": 4
+      }
+    },
+    {
+      "name": "insufficient_submissions_when_one_photo_remains",
+      "roster": [
+        "a",
+        "b",
+        "c"
+      ],
+      "activeMembers": [
+        "a",
+        "b",
+        "c"
+      ],
+      "submissions": [
+        {
+          "id": "sa",
+          "author": "a",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sb",
+          "author": "b",
+          "status": "WITHDRAWN"
+        },
+        {
+          "id": "sc",
+          "author": "c",
+          "status": "REMOVED"
+        }
+      ],
+      "blocks": [],
+      "ballots": [],
+      "expected": {
+        "outcome": "INSUFFICIENT_SUBMISSIONS",
+        "coWinnerSubmissionIds": [],
+        "tallies": [],
+        "winnerSubmissionId": null,
+        "ballotCount": 0,
+        "eligibleVoterCount": 3
+      }
+    },
+    {
+      "name": "insufficient_ballots_with_one_vote",
+      "roster": [
+        "a",
+        "b",
+        "c"
+      ],
+      "activeMembers": [
+        "a",
+        "b",
+        "c"
+      ],
+      "submissions": [
+        {
+          "id": "sa",
+          "author": "a",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sb",
+          "author": "b",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sc",
+          "author": "c",
+          "status": "ACTIVE"
+        }
+      ],
+      "blocks": [],
+      "ballots": [
+        {
+          "voter": "a",
+          "submission": "sb"
+        }
+      ],
+      "expected": {
+        "outcome": "INSUFFICIENT_BALLOTS",
+        "coWinnerSubmissionIds": [],
+        "tallies": [
+          {
+            "submissionId": "sa",
+            "votes": 0
+          },
+          {
+            "submissionId": "sb",
+            "votes": 1
+          },
+          {
+            "submissionId": "sc",
+            "votes": 0
+          }
+        ],
+        "winnerSubmissionId": null,
+        "ballotCount": 1,
+        "eligibleVoterCount": 3
+      }
+    },
+    {
+      "name": "ballot_for_removed_submission_is_void",
+      "roster": [
+        "a",
+        "b",
+        "c"
+      ],
+      "activeMembers": [
+        "a",
+        "b",
+        "c"
+      ],
+      "submissions": [
+        {
+          "id": "sa",
+          "author": "a",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sb",
+          "author": "b",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sc",
+          "author": "c",
+          "status": "REMOVED"
+        }
+      ],
+      "blocks": [],
+      "ballots": [
+        {
+          "voter": "a",
+          "submission": "sb"
+        },
+        {
+          "voter": "b",
+          "submission": "sc"
+        },
+        {
+          "voter": "c",
+          "submission": "sb"
+        }
+      ],
+      "expected": {
+        "outcome": "WINNER",
+        "coWinnerSubmissionIds": [
+          "sb"
+        ],
+        "tallies": [
+          {
+            "submissionId": "sa",
+            "votes": 0
+          },
+          {
+            "submissionId": "sb",
+            "votes": 2
+          }
+        ],
+        "winnerSubmissionId": "sb",
+        "ballotCount": 2,
+        "eligibleVoterCount": 3
+      }
+    },
+    {
+      "name": "self_vote_is_void",
+      "roster": [
+        "a",
+        "b",
+        "c"
+      ],
+      "activeMembers": [
+        "a",
+        "b",
+        "c"
+      ],
+      "submissions": [
+        {
+          "id": "sa",
+          "author": "a",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sb",
+          "author": "b",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sc",
+          "author": "c",
+          "status": "ACTIVE"
+        }
+      ],
+      "blocks": [],
+      "ballots": [
+        {
+          "voter": "a",
+          "submission": "sa"
+        },
+        {
+          "voter": "b",
+          "submission": "sa"
+        },
+        {
+          "voter": "c",
+          "submission": "sa"
+        }
+      ],
+      "expected": {
+        "outcome": "WINNER",
+        "coWinnerSubmissionIds": [
+          "sa"
+        ],
+        "tallies": [
+          {
+            "submissionId": "sa",
+            "votes": 2
+          },
+          {
+            "submissionId": "sb",
+            "votes": 0
+          },
+          {
+            "submissionId": "sc",
+            "votes": 0
+          }
+        ],
+        "winnerSubmissionId": "sa",
+        "ballotCount": 2,
+        "eligibleVoterCount": 3
+      }
+    },
+    {
+      "name": "blocked_pair_ballot_is_void_and_can_cause_tie",
+      "roster": [
+        "a",
+        "b",
+        "c"
+      ],
+      "activeMembers": [
+        "a",
+        "b",
+        "c"
+      ],
+      "submissions": [
+        {
+          "id": "sa",
+          "author": "a",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sb",
+          "author": "b",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sc",
+          "author": "c",
+          "status": "ACTIVE"
+        }
+      ],
+      "blocks": [
+        [
+          "a",
+          "b"
+        ]
+      ],
+      "ballots": [
+        {
+          "voter": "a",
+          "submission": "sb"
+        },
+        {
+          "voter": "b",
+          "submission": "sc"
+        },
+        {
+          "voter": "c",
+          "submission": "sb"
+        }
+      ],
+      "expected": {
+        "outcome": "TIE",
+        "coWinnerSubmissionIds": [
+          "sb",
+          "sc"
+        ],
+        "tallies": [
+          {
+            "submissionId": "sa",
+            "votes": 0
+          },
+          {
+            "submissionId": "sb",
+            "votes": 1
+          },
+          {
+            "submissionId": "sc",
+            "votes": 1
+          }
+        ],
+        "winnerSubmissionId": null,
+        "ballotCount": 2,
+        "eligibleVoterCount": 3
+      }
+    },
+    {
+      "name": "only_first_ballot_per_voter_counts",
+      "roster": [
+        "a",
+        "b",
+        "c"
+      ],
+      "activeMembers": [
+        "a",
+        "b",
+        "c"
+      ],
+      "submissions": [
+        {
+          "id": "sa",
+          "author": "a",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sb",
+          "author": "b",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sc",
+          "author": "c",
+          "status": "ACTIVE"
+        }
+      ],
+      "blocks": [],
+      "ballots": [
+        {
+          "voter": "a",
+          "submission": "sb"
+        },
+        {
+          "voter": "a",
+          "submission": "sc"
+        },
+        {
+          "voter": "b",
+          "submission": "sb"
+        }
+      ],
+      "expected": {
+        "outcome": "WINNER",
+        "coWinnerSubmissionIds": [
+          "sb"
+        ],
+        "tallies": [
+          {
+            "submissionId": "sa",
+            "votes": 0
+          },
+          {
+            "submissionId": "sb",
+            "votes": 2
+          },
+          {
+            "submissionId": "sc",
+            "votes": 0
+          }
+        ],
+        "winnerSubmissionId": "sb",
+        "ballotCount": 2,
+        "eligibleVoterCount": 3
+      }
+    },
+    {
+      "name": "zero_ballots_with_two_photos",
+      "roster": [
+        "a",
+        "b",
+        "c"
+      ],
+      "activeMembers": [
+        "a",
+        "b",
+        "c"
+      ],
+      "submissions": [
+        {
+          "id": "sa",
+          "author": "a",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "sb",
+          "author": "b",
+          "status": "ACTIVE"
+        }
+      ],
+      "blocks": [],
+      "ballots": [],
+      "expected": {
+        "outcome": "INSUFFICIENT_BALLOTS",
+        "coWinnerSubmissionIds": [],
+        "tallies": [
+          {
+            "submissionId": "sa",
+            "votes": 0
+          },
+          {
+            "submissionId": "sb",
+            "votes": 0
+          }
+        ],
+        "winnerSubmissionId": null,
+        "ballotCount": 0,
+        "eligibleVoterCount": 3
+      }
+    }
+  ]
+}

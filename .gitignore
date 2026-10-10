@@ -29,3 +29,11 @@ google-services.json
 # Misc
 .DS_Store
 Thumbs.db
+
+# PhotoDuel backend and tooling
+apps/photoduel/backend/node_modules/
+apps/photoduel/backend/dist/
+apps/photoduel/backend/.env
+apps/photoduel/backend/data/
+apps/photoduel/backend/coverage/
+apps/photoduel/.kotlin/
