@@ -53,6 +53,11 @@ class UserPreferences(context: Context) {
         }
     }
 
+    /** Removes every key, including onboarding state and the last export preset. Used by "Delete all data". */
+    suspend fun clearAll() {
+        store.edit { prefs -> prefs.clear() }
+    }
+
     /** A corrupt or unreadable preference file reads as defaults instead of crashing the library screen. */
     private fun readPreferences(): Flow<Preferences> = store.data.catch { error ->
         if (error is IOException) emit(emptyPreferences()) else throw error

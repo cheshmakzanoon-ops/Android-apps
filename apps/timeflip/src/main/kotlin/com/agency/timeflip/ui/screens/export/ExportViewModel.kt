@@ -60,6 +60,8 @@ class ExportViewModel(
     savedStateHandle: SavedStateHandle,
     private val projects: ProjectRepository,
     private val exporter: VideoExportEngine,
+    /** Waits for the startup storage recovery before the first export. Tests use the no-op default. */
+    private val awaitStartup: suspend () -> Unit = {},
 ) : ViewModel() {
 
     private val handle: SavedStateHandle = savedStateHandle
@@ -91,6 +93,7 @@ class ExportViewModel(
         }
         job = viewModelScope.launch {
             try {
+                awaitStartup()
                 exporter.export(request).collect { progress -> onProgress(progress) }
             } catch (e: CancellationException) {
                 throw e

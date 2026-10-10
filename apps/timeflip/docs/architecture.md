@@ -58,7 +58,7 @@ only through `AppContainer`.
 
 - `engine/image/PhotoBitmaps(photoStore)`: `suspend fun decode(id: PhotoId, maxEdge: Int): Bitmap?`
   Decodes the private, already-oriented copy with a bounded sample size.
-- `engine/alignment/AutoAligner(photoStore, photoBitmaps)`: `suspend fun align(pair: ImagePair, frame: PixelSize): AlignmentEstimate`.
+- `engine/auto/AutoAligner(photoStore, photoBitmaps)` (package `com.agency.timeflip.engine.auto`): `suspend fun align(pair: ImagePair, frame: PixelSize): AlignmentEstimate`. It lives outside `engine/alignment` because it depends on `Bitmap`, and `engine/alignment` must stay pure Kotlin for the JVM tests.
 - `engine/render/FrameRenderer.draw(canvas, frame, before, after, alignment, transition, linearProgress)`:
   the single Android drawing path used by both the Compose preview and the MP4 exporter.
 - `engine/export/Mp4VideoExporter(photoStore, exportsDir, nowMs): VideoExportEngine`.

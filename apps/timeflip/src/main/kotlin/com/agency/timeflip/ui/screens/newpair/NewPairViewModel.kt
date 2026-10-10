@@ -68,6 +68,8 @@ class NewPairViewModel(
     private val photos: PhotoStore,
     private val now: () -> Long = System::currentTimeMillis,
     private val newId: () -> ProjectId = { ProjectId(UUID.randomUUID().toString()) },
+    /** Waits for the startup storage recovery before the first import. Tests use the no-op default. */
+    private val awaitStartup: suspend () -> Unit = {},
 ) : ViewModel() {
 
     /** Present when the screen edits the photos of an existing project (route argument). */
@@ -170,6 +172,7 @@ class NewPairViewModel(
         _state.update { it.copy(importing = slot, importFailure = null) }
         importJob = viewModelScope.launch {
             try {
+                awaitStartup()
                 val imported = photos.importPhoto(source, slot, now())
                 pendingImports += imported.id
                 val previous = photoIn(_state.value, slot)
