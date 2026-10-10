@@ -29,3 +29,6 @@ google-services.json
 # Misc
 .DS_Store
 Thumbs.db
+
+# Kotlin tooling cache
+.kotlin/
