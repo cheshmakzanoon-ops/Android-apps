@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose draws the real theme; this window style only avoids a flash on launch. -->
+    <style name="Theme.TimeFlip" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/timeflip_background</item>
+    </style>
+</resources>
