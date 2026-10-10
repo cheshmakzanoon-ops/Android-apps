@@ -1,0 +1,14 @@
+# RetroWorld delivery team
+
+No real GitHub usernames have been assigned yet; populate them only after collaborator onboarding.
+
+| Role seat | Responsibility | App-local primary folder | Actual GitHub handle |
+|---|---|---|---|
+| RW-D1 | Android UX and UI | `ui/` | Unassigned |
+| RW-D2 | Domain rules/contracts | `domain/` | Unassigned |
+| RW-D3 | Persistence/backend/privacy | `data/` | Unassigned |
+| RW-D4 | Differentiating engine/media | `engine/` | Unassigned |
+| RW-D5 | OS, instrumentation, device QA | `platform/`, `androidTest/` | Unassigned |
+| RW-PM | Planning, integration, release | `docs/`, `store/` | Unassigned |
+
+Workflow: D2 contracts/fakes unblock D1, D3, D4 and D5 in parallel; developers merge small reviewed PRs to main; PM accepts the same integrated SHA at G2–G6 and coordinates authorized Play publishing. See [full specific tasks](../../project-outline-android-apps.md#5-app-specific-squad-assignments-and-independent-pm-release-controls).

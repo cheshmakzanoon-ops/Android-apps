@@ -1,0 +1,31 @@
+# Android Gradle and editor
+.gradle/
+**/build/
+local.properties
+.idea/
+*.iml
+.cxx/
+.externalNativeBuild/
+captures/
+*.hprof
+# Outputs
+*.apk
+*.aab
+**/exports/
+**/raw-user-data/
+# Sensitive and signing artifacts
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+service-account*.json
+signing.properties
+secrets.properties
+google-services.json
+.env
+.env.*
+!.env.example
+# Misc
+.DS_Store
+Thumbs.db
