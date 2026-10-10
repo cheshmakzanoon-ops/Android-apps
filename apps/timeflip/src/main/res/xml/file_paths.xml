@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Only exported videos are shared; photos and projects stay in private storage. -->
+<!--
+  Only exported videos are shared. Exports are written to filesDir/timeflip/exports/ and shared from
+  that real location, so no duplicate copy is made. Photos and projects are never listed here.
+  The authority is "${applicationId}.exports" (see AndroidManifest.xml).
+-->
 <paths>
-    <cache-path name="exports" path="exports/" />
+    <files-path name="timeflip_exports" path="timeflip/exports/" />
 </paths>
