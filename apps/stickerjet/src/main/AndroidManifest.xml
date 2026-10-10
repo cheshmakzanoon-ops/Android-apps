@@ -4,8 +4,14 @@
   - Videos are chosen with the system Photo Picker, which grants a temporary per-file read URI.
   - Exports are shared through a FileProvider content URI, not a storage permission.
   - No INTERNET permission: the core features run offline. CI fails if one is merged in.
+    A library (ML Kit / Play services) may merge INTERNET in; tools:node="remove" below strips it
+    from the merged manifest. Segmentation uses the bundled selfie model and needs no network.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
 
     <application
         android:name=".app.StickerJetApplication"
@@ -28,6 +34,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Shares exports through content:// URIs only. Not exported; read grants are per-intent. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

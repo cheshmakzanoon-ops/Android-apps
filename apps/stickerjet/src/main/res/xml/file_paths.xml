@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Only the temporary share copies are exposed. Exported projects and the original clips stay
+  private. ExportSharing copies an export into cacheDir/share/ before it builds a content URI.
+-->
+<paths>
+    <cache-path name="share" path="share/" />
+</paths>

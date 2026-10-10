@@ -1,0 +1,171 @@
+package com.agency.stickerjet.domain
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
+
+class StickerProjectsTest {
+
+    private fun source(fileName: String = "My clip.mp4", durationMs: Long = 10_000L) =
+        SourceVideo(fileName = fileName, durationMs = durationMs, width = 640, height = 480, rotationDegrees = 0, sizeBytes = 1_000L)
+
+    private fun project(durationMs: Long = 10_000L) = StickerProjects.create("p1", source(durationMs = durationMs), nowMs = 100L)
+
+    @Test
+    fun createSetsDefaultsFromTheSourceAndTheClock() {
+        val created = StickerProjects.create("p1", source(), nowMs = 100L)
+        assertEquals("p1", created.id)
+        assertEquals("My clip", created.title)
+        assertEquals(TrimRange(0, 2_000), created.trim)
+        assertEquals(Transform(), created.transform)
+        assertEquals(Caption(), created.caption)
+        assertEquals(BackgroundMode.ORIGINAL, created.background)
+        assertTrue(created.maskStrokes.isEmpty())
+        assertTrue(created.exports.isEmpty())
+        assertEquals(100L, created.createdAtMs)
+        assertEquals(100L, created.updatedAtMs)
+    }
+
+    @Test
+    fun createFromAShortSourceGivesTheFullSourceAsTrim() {
+        assertEquals(TrimRange(0, 300), StickerProjects.create("p1", source(durationMs = 300L), 1L).trim)
+    }
+
+    @Test
+    fun titleIsTheFileNameWithoutDirectoryOrExtension() {
+        assertEquals("My clip.final", StickerProjects.create("p", source("clips/My clip.final.mp4"), 1L).title)
+        assertEquals("a.b.c", StickerProjects.create("p", source("a.b.c.mov"), 1L).title)
+        assertEquals("No extension", StickerProjects.create("p", source("No extension"), 1L).title)
+    }
+
+    @Test
+    fun titleFallsBackToStickerWhenTheNameHasNoUsableStem() {
+        for (name in listOf(".mp4", "clips/.mp4", "   .mp4", "\t.mov")) {
+            assertEquals("Sticker", StickerProjects.create("p", source(name), 1L).title, "file name '$name'")
+        }
+    }
+
+    @Test
+    fun titleKeepsUnicodeAndCollapsesWhitespace() {
+        assertEquals("Vidéo 🎬 final", StickerProjects.create("p", source("Vidéo \t 🎬   final.mp4"), 1L).title)
+        assertEquals("日本語", StickerProjects.create("p", source("日本語.mp4"), 1L).title)
+    }
+
+    @Test
+    fun normalizeTitleHandlesEmptyAndBlankInput() {
+        assertEquals("Sticker", StickerProjects.normalizeTitle(""))
+        assertEquals("Sticker", StickerProjects.normalizeTitle(" \n\t "))
+        assertEquals("A B", StickerProjects.normalizeTitle("  A   B  "))
+    }
+
+    @Test
+    fun createRejectsABlankId() {
+        assertFailsWith<IllegalArgumentException> { StickerProjects.create(" ", source(), 1L) }
+    }
+
+    @Test
+    fun withTrimClampsTheWindowIntoTheSource() {
+        val edited = project().withTrim(TrimRange(9_000, 9_100), nowMs = 5L)
+        assertEquals(TrimRange(9_000, 9_500), edited.trim)
+        assertEquals(5L, edited.updatedAtMs)
+    }
+
+    @Test
+    fun withTrimOfAValidWindowKeepsItExactly() {
+        assertEquals(TrimRange(1_000, 3_500), project().withTrim(TrimRange(1_000, 3_500), 2L).trim)
+    }
+
+    @Test
+    fun editsLeaveTheOriginalProjectUnchanged() {
+        val original = project()
+        original.withTrim(TrimRange(1_000, 3_000), 2L).withTitle("Other", 3L)
+        assertEquals(TrimRange(0, 2_000), original.trim)
+        assertEquals("My clip", original.title)
+        assertEquals(100L, original.updatedAtMs)
+    }
+
+    @Test
+    fun withTransformNormalizesQuarterTurns() {
+        val turns = mapOf(-1 to 3, 4 to 0, 5 to 1, -4 to 0, 2 to 2)
+        for ((input, expected) in turns) {
+            val edited = project().withTransform(Transform(scale = 1.5f, quarterTurns = input), 2L)
+            assertEquals(expected, edited.transform.quarterTurns, "quarterTurns $input")
+            assertEquals(1.5f, edited.transform.scale)
+        }
+    }
+
+    @Test
+    fun withTransformRejectsNonPositiveOrNonFiniteValues() {
+        val bad = listOf(
+            Transform(scale = 0f),
+            Transform(scale = -1f),
+            Transform(scale = Float.NaN),
+            Transform(scale = Float.POSITIVE_INFINITY),
+            Transform(offsetX = Float.NaN),
+            Transform(offsetY = Float.NEGATIVE_INFINITY),
+        )
+        for (transform in bad) {
+            assertFailsWith<IllegalArgumentException>("transform $transform") { project().withTransform(transform, 2L) }
+        }
+    }
+
+    @Test
+    fun withCaptionNormalizesTheTextAndKeepsStyle() {
+        val edited = project().withCaption(Caption(text = "  hi    there ", position = CaptionPosition.TOP, argb = 0xFF00FF00L), 2L)
+        assertEquals("hi there", edited.caption.text)
+        assertEquals(CaptionPosition.TOP, edited.caption.position)
+        assertEquals(0xFF00FF00L, edited.caption.argb)
+    }
+
+    @Test
+    fun withCaptionAcceptsTheFullArgbRangeOnly() {
+        assertEquals(0xFFFFFFFFL, project().withCaption(Caption(argb = 0xFFFFFFFFL), 2L).caption.argb)
+        assertFailsWith<IllegalArgumentException> { project().withCaption(Caption(argb = -1L), 2L) }
+        assertFailsWith<IllegalArgumentException> { project().withCaption(Caption(argb = 0x1_0000_0000L), 2L) }
+    }
+
+    @Test
+    fun withCaptionCapsLongText() {
+        val edited = project().withCaption(Caption(text = "x".repeat(60)), 2L)
+        assertEquals("x".repeat(StickerLimits.MAX_CAPTION_CHARS), edited.caption.text)
+    }
+
+    @Test
+    fun withBackgroundKeepsTheMaskStrokes() {
+        val stroke = MaskStroke(StrokeMode.ERASE, listOf(NormalizedPoint(0.5f, 0.5f)), radius = 0.1f)
+        val withStroke = project().withStroke(stroke, 2L).withBackground(BackgroundMode.REMOVE_BACKGROUND, 3L)
+        assertEquals(BackgroundMode.REMOVE_BACKGROUND, withStroke.background)
+        assertEquals(listOf(stroke), withStroke.maskStrokes)
+    }
+
+    @Test
+    fun withStrokeAppendsInOrder() {
+        val first = MaskStroke(StrokeMode.RESTORE, listOf(NormalizedPoint(0f, 0f), NormalizedPoint(1f, 1f)), 0.05f)
+        val second = MaskStroke(StrokeMode.ERASE, listOf(NormalizedPoint(0.2f, 0.8f)), 0.2f)
+        assertEquals(listOf(first, second), project().withStroke(first, 2L).withStroke(second, 3L).maskStrokes)
+    }
+
+    @Test
+    fun withStrokeRejectsInvalidStrokes() {
+        val valid = NormalizedPoint(0.5f, 0.5f)
+        val bad = listOf(
+            MaskStroke(StrokeMode.RESTORE, emptyList(), 0.1f),
+            MaskStroke(StrokeMode.RESTORE, listOf(NormalizedPoint(1.5f, 0.5f)), 0.1f),
+            MaskStroke(StrokeMode.RESTORE, listOf(NormalizedPoint(-0.1f, 0.5f)), 0.1f),
+            MaskStroke(StrokeMode.RESTORE, listOf(NormalizedPoint(Float.NaN, 0.5f)), 0.1f),
+            MaskStroke(StrokeMode.RESTORE, listOf(valid), 0f),
+            MaskStroke(StrokeMode.RESTORE, listOf(valid), Float.NaN),
+        )
+        for (stroke in bad) {
+            assertFailsWith<IllegalArgumentException>("stroke $stroke") { project().withStroke(stroke, 2L) }
+        }
+    }
+
+    @Test
+    fun withTitleNormalizesAndFallsBackWhenEmpty() {
+        assertEquals("My sticker", project().withTitle("  My   sticker ", 2L).title)
+        assertEquals("Sticker", project().withTitle("   ", 2L).title)
+        assertEquals("Ça va 🎉", project().withTitle("Ça  va\t🎉", 2L).title)
+    }
+}

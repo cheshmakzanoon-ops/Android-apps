@@ -67,6 +67,13 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
+
+    sourceSets {
+        // Shared source clips. Only the instrumented journey reads them, so they never reach the APK.
+        getByName("androidTest") {
+            assets.srcDir("assets/source")
+        }
+    }
 }
 
 kotlin {
@@ -96,10 +103,14 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     testImplementation(libs.junit4)
+    // In-memory fakes of the domain ports (InMemoryProjectRepository, FakeFrameSource, ...).
+    testImplementation(testFixtures(project(":apps:stickerjet-core")))
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    // The journey builds the same Json as the composition root; core keeps it implementation-only.
+    androidTestImplementation(libs.kotlinx.serialization.json)
 }

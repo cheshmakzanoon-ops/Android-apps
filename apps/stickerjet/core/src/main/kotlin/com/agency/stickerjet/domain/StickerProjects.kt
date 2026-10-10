@@ -1,0 +1,37 @@
+package com.agency.stickerjet.domain
+
+/** Factory and title rules for [StickerProject]. */
+object StickerProjects {
+
+    /** Title used when no usable name is left. */
+    const val FALLBACK_TITLE: String = "Sticker"
+
+    /**
+     * A new project with the default trim from [TrimPolicy.defaultTrim], default transform, caption and
+     * background, no strokes or exports, and both timestamps set to [nowMs]. The title is the source file
+     * name without its directory and extension, normalized by [normalizeTitle].
+     */
+    fun create(id: String, source: SourceVideo, nowMs: Long): StickerProject {
+        require(id.isNotBlank()) { "Project id must not be blank" }
+        return StickerProject(
+            id = id,
+            title = normalizeTitle(stemOf(source.fileName)),
+            source = source,
+            trim = TrimPolicy.defaultTrim(source.durationMs),
+            createdAtMs = nowMs,
+            updatedAtMs = nowMs,
+        )
+    }
+
+    /**
+     * Collapses whitespace in [raw] and trims it. Returns [FALLBACK_TITLE] when nothing is left.
+     * Unicode is kept as written, and titles are not length-capped.
+     */
+    fun normalizeTitle(raw: String): String = collapseWhitespace(raw).ifEmpty { FALLBACK_TITLE }
+
+    /** `"clips/My clip.final.mp4"` gives `"My clip.final"`. A name that starts with a dot gives an empty stem. */
+    private fun stemOf(fileName: String): String {
+        val name = fileName.substringAfterLast('/')
+        return name.substringBeforeLast('.', missingDelimiterValue = name)
+    }
+}

@@ -4,6 +4,9 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
+    // Publishes src/testFixtures (in-memory fakes of the domain ports) to the test classpath of
+    // other modules: testImplementation(testFixtures(project(":apps:stickerjet-core"))).
+    `java-test-fixtures`
 }
 
 dependencies {
