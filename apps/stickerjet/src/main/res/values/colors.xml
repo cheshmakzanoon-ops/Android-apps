@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#FF1B2A41</color>
+    <!-- Window colours before Compose draws. They match StickerPalette.Paper and StickerPalette.Ink. -->
+    <color name="sticker_paper">#FFFFF7EC</color>
+    <color name="sticker_ink">#FF1C1B2E</color>
 </resources>

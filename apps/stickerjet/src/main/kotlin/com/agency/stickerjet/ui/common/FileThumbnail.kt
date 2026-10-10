@@ -16,9 +16,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import com.agency.stickerjet.ui.theme.StickerTileShape
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /**
  * Shows a stored JPEG thumbnail. The file is decoded off the main thread; until it arrives, or when

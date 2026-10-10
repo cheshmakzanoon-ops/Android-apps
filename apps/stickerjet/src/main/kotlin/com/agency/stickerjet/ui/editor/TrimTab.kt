@@ -25,8 +25,8 @@ import com.agency.stickerjet.domain.StickerProject
 import com.agency.stickerjet.ui.common.StickerFormat
 import com.agency.stickerjet.ui.common.toImageBitmap
 import com.agency.stickerjet.ui.components.LabeledSlider
-import com.agency.stickerjet.ui.components.StatusPanel
 import com.agency.stickerjet.ui.components.StatusKind
+import com.agency.stickerjet.ui.components.StatusPanel
 import com.agency.stickerjet.ui.theme.Spacing
 import com.agency.stickerjet.ui.theme.StickerTheme
 

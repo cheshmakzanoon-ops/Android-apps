@@ -8,7 +8,7 @@ package com.agency.stickerjet.engine
  * the faint tail below [LOW], which is where colour halos come from. Values above [HIGH] become opaque
  * and values below [LOW] transparent, so flicker from one-pixel confidence noise between frames is
  * suppressed. The 0.5 crossing is preserved, so the outline does not move. Radius 1 is used because a
- * radius of 2 or more erases discs of 2 to 4 px; see the simulation notes in MaskRefiner.
+ * radius of 2 or more erases discs of 2 to 4 px (see the tap test in MaskRefinerTest).
  */
 internal object MaskSmoothing {
     const val LOW: Float = 0.35f

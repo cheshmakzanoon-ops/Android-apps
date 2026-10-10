@@ -70,6 +70,13 @@ class MaskRefinerTest {
     }
 
     @Test
+    fun smallRestoreTapSurvivesTheEdgeSmoothing() {
+        // A 2 px disc is the smallest stroke the smoothing keeps; a larger blur would erase it.
+        val mask = MaskRefiner.refine(zeros(100, 100), 100, 100, listOf(stroke(StrokeMode.RESTORE, 0.5f, 0.5f, 0.0f)))
+        assertEquals(255, mask.at(50, 50), "the tap's centre pixel survives")
+    }
+
+    @Test
     fun strokeOutsideTheFrameIsClampedNotRejected() {
         val stroke = MaskStroke(
             StrokeMode.RESTORE,

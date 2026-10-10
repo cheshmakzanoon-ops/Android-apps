@@ -9,8 +9,8 @@ import com.agency.stickerjet.domain.MaskStroke
 import com.agency.stickerjet.domain.ProjectRepository
 import com.agency.stickerjet.domain.StickerProject
 import com.agency.stickerjet.domain.SubjectSegmenter
-import kotlinx.coroutines.flow.Flow
 import java.io.File
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Everything the screens need from the rest of the app, expressed in ui-owned types. The composition

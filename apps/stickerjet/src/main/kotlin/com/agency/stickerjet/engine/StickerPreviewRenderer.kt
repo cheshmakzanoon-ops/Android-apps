@@ -2,6 +2,7 @@ package com.agency.stickerjet.engine
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import com.agency.stickerjet.domain.ExportPlan
 import com.agency.stickerjet.domain.FrameSource
 import com.agency.stickerjet.domain.StickerProject
 import com.agency.stickerjet.domain.SubjectSegmenter
@@ -29,9 +30,9 @@ class StickerPreviewRenderer(
     /** Renders the trimmed loop of [project] on a [canvasPx]-pixel square canvas. */
     suspend fun render(project: StickerProject, canvasPx: Int): PreviewResult = withContext(Dispatchers.Default) {
         require(canvasPx > 0) { "Preview canvas must be positive" }
-        val frameCount = LoopTiming.frameCount(project.trim.durationMs)
-        val timestamps = LoopTiming.timestampsMs(project.trim.startMs, frameCount)
-        val durations = LoopTiming.durationsMs(frameCount)
+        val timestamps = ExportPlan.frameTimestampsMs(project.trim)
+        val durations = ExportPlan.frameDurationsMs(project.trim)
+        val frameCount = timestamps.size
         val pipeline = StickerPipeline(segmenter, captions)
         val rendered = ArrayList<Bitmap>(frameCount)
         try {

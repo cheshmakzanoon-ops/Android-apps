@@ -38,7 +38,6 @@ import com.agency.stickerjet.ui.theme.StickerShapes
 import com.agency.stickerjet.ui.theme.StickerTheme
 import java.io.File
 import kotlin.math.roundToInt
-import android.graphics.Bitmap
 
 /**
  * Preview tab: the rendered loop (the same pipeline as export, at preview size), then the export

@@ -8,8 +8,8 @@ import com.agency.stickerjet.domain.ProjectRepository
 import com.agency.stickerjet.domain.StickerLimits
 import com.agency.stickerjet.domain.StickerProject
 import com.agency.stickerjet.domain.SubjectSegmenter
-import com.agency.stickerjet.domain.TrimPolicy
 import com.agency.stickerjet.domain.Transform
+import com.agency.stickerjet.domain.TrimPolicy
 import com.agency.stickerjet.domain.withBackground
 import com.agency.stickerjet.domain.withCaption
 import com.agency.stickerjet.domain.withTransform

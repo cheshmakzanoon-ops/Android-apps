@@ -1,9 +1,12 @@
 package com.agency.stickerjet.engine
 
+import com.agency.stickerjet.data.ProjectFiles
 import com.agency.stickerjet.domain.AlphaMask
+import com.agency.stickerjet.domain.ExportPlan
 import com.agency.stickerjet.domain.ExportRecord
 import com.agency.stickerjet.domain.FrameSource
 import com.agency.stickerjet.domain.ProjectRepository
+import com.agency.stickerjet.domain.StickerFileNamer
 import com.agency.stickerjet.domain.StickerLimits
 import com.agency.stickerjet.domain.StickerProject
 import com.agency.stickerjet.domain.SubjectSegmenter
@@ -25,19 +28,19 @@ import java.io.IOException
  * and muxes with [AnimatedWebpWriter]. The quality ladder 85, 70, 55, 40 is tried until the file fits
  * [StickerLimits.MAX_EXPORT_BYTES]. Later passes re-decode the frames but do not re-segment them.
  *
- * Publishing: the file is written to `<name>.part` in [exportsDirFor], renamed to its final name, and only
+ * Publishing: the file is written to `<name>.part` in the exports directory of [files], renamed to its final name, and only
  * then is the record appended to the project. Cancellation or failure deletes the temporary and any published
  * file, and leaves the project draft as it was.
  *
- * [exportsDirFor] is the app's `ProjectFiles.exportsDir` wired in the composition root. The engine does not
- * depend on the data package.
+ * [files] is the data layer's [ProjectFiles], as architecture section 3.4 specifies. It supplies the exports
+ * directory. Frame timing comes from [ExportPlan] and file names from [StickerFileNamer].
  */
 class StickerExporter(
     private val frames: FrameSource,
     private val segmenter: SubjectSegmenter,
     private val encoder: FrameEncoder,
     private val repository: ProjectRepository,
-    private val exportsDirFor: (projectId: String) -> File,
+    private val files: ProjectFiles,
     private val clock: () -> Long,
 ) {
     private val captions = CaptionRenderer()
@@ -49,14 +52,14 @@ class StickerExporter(
      */
     suspend fun export(project: StickerProject, onProgress: (Float) -> Unit): ExportOutcome =
         withContext(Dispatchers.Default) {
-            val exportDir = exportsDirFor(project.id)
+            val exportDir = files.exportsDir(project.id)
             var temp: File? = null
             var published: File? = null
             try {
                 onProgress(0f)
-                val frameCount = LoopTiming.frameCount(project.trim.durationMs)
-                val timestamps = LoopTiming.timestampsMs(project.trim.startMs, frameCount)
-                val durations = LoopTiming.durationsMs(frameCount)
+                val timestamps = ExportPlan.frameTimestampsMs(project.trim)
+                val durations = ExportPlan.frameDurationsMs(project.trim)
+                val frameCount = timestamps.size
                 val pipeline = StickerPipeline(segmenter, captions)
                 val bytes = encodeWithinBudget(project, timestamps, durations, pipeline, onProgress)
                     ?: return@withContext ExportOutcome.Failed(ExportFailure.TOO_LARGE)
@@ -66,7 +69,7 @@ class StickerExporter(
                     return@withContext ExportOutcome.Failed(ExportFailure.LOW_STORAGE)
                 }
                 val now = clock()
-                val name = ExportNaming.fileName(project.title, now, exportDir.list()?.toSet().orEmpty())
+                val name = StickerFileNamer.fileName(project.title, now, exportDir.list()?.toSet().orEmpty())
                 val part = File(exportDir, "$name.part")
                 temp = part
                 withContext(Dispatchers.IO) { writeFile(part, bytes) }

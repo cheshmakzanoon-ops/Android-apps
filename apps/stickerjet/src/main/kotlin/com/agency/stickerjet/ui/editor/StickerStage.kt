@@ -23,13 +23,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.agency.stickerjet.domain.Caption
 import com.agency.stickerjet.domain.CaptionPosition
 import com.agency.stickerjet.domain.Transform
+import com.agency.stickerjet.ui.theme.Spacing
 import com.agency.stickerjet.ui.theme.StickerPalette
 import com.agency.stickerjet.ui.theme.StickerTileShape
-import com.agency.stickerjet.ui.theme.Spacing
 
 /**
  * The square preview the Style tab edits. It shows the still frame with the placement applied and the

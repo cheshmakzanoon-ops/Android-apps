@@ -6,6 +6,7 @@ import com.agency.stickerjet.domain.ExportRecord
 import com.agency.stickerjet.domain.ProjectRepository
 import com.agency.stickerjet.domain.StickerProject
 import com.agency.stickerjet.ui.ports.ProjectFilesPort
+import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /** One draft shown as a library tile. [sourceMissing] is true when the original video file is gone. */
 data class LibraryItem(

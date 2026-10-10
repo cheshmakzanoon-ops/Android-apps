@@ -27,12 +27,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.agency.stickerjet.R
 import com.agency.stickerjet.domain.StickerProject
 import com.agency.stickerjet.platform.ExportSharing
+import com.agency.stickerjet.ui.components.LoadingPanel
 import com.agency.stickerjet.ui.components.StatusKind
 import com.agency.stickerjet.ui.components.StatusPanel
 import com.agency.stickerjet.ui.components.StickerTabRow
 import com.agency.stickerjet.ui.components.StickerTextButton
 import com.agency.stickerjet.ui.components.StickerTopBar
-import com.agency.stickerjet.ui.components.LoadingPanel
 import com.agency.stickerjet.ui.theme.Spacing
 import com.agency.stickerjet.ui.theme.StickerShapes
 import java.io.File
