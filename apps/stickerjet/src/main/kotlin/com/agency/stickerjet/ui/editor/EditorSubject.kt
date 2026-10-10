@@ -17,7 +17,7 @@ internal suspend fun EditorSession.ensureStill(): ArgbFrame? {
     val current = project ?: return null
     if (state.value.sourceMissing) return null
     val still = try {
-        frames.frames(current.source.fileName, listOf(current.trim.startMs), EditorFrameSizes.STILL_MAX_SIDE_PX).first()
+        frames.frames(current.id, listOf(current.trim.startMs), EditorFrameSizes.STILL_MAX_SIDE_PX).first()
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {

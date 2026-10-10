@@ -64,7 +64,7 @@ class FixtureFakesTest {
 
     @Test
     fun frameSourceEmitsOneFramePerTimestampInOrder() = runBlocking {
-        val frames = FakeFrameSource().frames("source.mp4", listOf(0L, 500L, 1_000L), maxSidePx = 512).toList()
+        val frames = FakeFrameSource().frames("project-1", listOf(0L, 500L, 1_000L), maxSidePx = 512).toList()
         assertEquals(listOf(0L, 500L, 1_000L), frames.map { it.timestampMs })
         assertEquals(480, frames.first().width)
         assertEquals(360, frames.first().height)
@@ -72,11 +72,11 @@ class FixtureFakesTest {
 
     @Test
     fun frameSourceScalesTheLongestSideWithTheAspectRatio() = runBlocking {
-        val landscape = FakeFrameSource(480, 360).frames("s", listOf(0L), maxSidePx = 240).toList().single()
+        val landscape = FakeFrameSource(480, 360).frames("project-1", listOf(0L), maxSidePx = 240).toList().single()
         assertEquals(240, landscape.width)
         assertEquals(180, landscape.height)
 
-        val portrait = FakeFrameSource(360, 480).frames("s", listOf(0L), maxSidePx = 240).toList().single()
+        val portrait = FakeFrameSource(360, 480).frames("project-1", listOf(0L), maxSidePx = 240).toList().single()
         assertEquals(180, portrait.width)
         assertEquals(240, portrait.height)
     }
@@ -84,15 +84,15 @@ class FixtureFakesTest {
     @Test
     fun frameSourceIsDeterministicAndMovesTheSquare() = runBlocking {
         val source = FakeFrameSource()
-        val first = source.frames("s", listOf(0L, 1_000L), maxSidePx = 128).toList()
-        val again = source.frames("s", listOf(0L, 1_000L), maxSidePx = 128).toList()
+        val first = source.frames("project-1", listOf(0L, 1_000L), maxSidePx = 128).toList()
+        val again = source.frames("project-1", listOf(0L, 1_000L), maxSidePx = 128).toList()
         assertContentEquals(first[0].pixels, again[0].pixels)
         assertNotEquals(first[0].pixels.toList(), first[1].pixels.toList())
     }
 
     @Test
     fun frameSourceRendersOpaquePixels() = runBlocking {
-        val frame = FakeFrameSource().frames("s", listOf(0L), maxSidePx = 64).toList().single()
+        val frame = FakeFrameSource().frames("project-1", listOf(0L), maxSidePx = 64).toList().single()
         assertTrue(frame.pixels.all { (it ushr 24) == 0xFF })
     }
 

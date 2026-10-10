@@ -12,9 +12,9 @@ import kotlin.math.min
  * square that moves left to right once every [PERIOD_MS]. The same inputs always give the same pixels,
  * so tests can compare frames.
  *
- * The project id is ignored, so every project gets the same synthetic clip. Frames are rendered one at a time as the flow is collected, and none
- * are kept, which mirrors the real streaming contract. The longest side is scaled down to `maxSidePx`
- * with the aspect ratio kept, the same as the real source.
+ * The project id is ignored, so every project gets the same synthetic clip. Frames are rendered one at
+ * a time as the flow is collected, and none are kept, which mirrors the real streaming contract. The
+ * longest side is scaled down to `maxSidePx` with the aspect ratio kept, the same as the real source.
  */
 class FakeFrameSource(
     private val sourceWidth: Int = 480,

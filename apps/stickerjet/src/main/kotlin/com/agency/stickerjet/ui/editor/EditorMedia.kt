@@ -20,7 +20,7 @@ internal suspend fun EditorSession.refreshTrimLoop() {
     val result: LoopState<ArgbFrame> = try {
         val timestamps = ExportPlan.frameTimestampsMs(current.trim)
         val durations = ExportPlan.frameDurationsMs(current.trim).toList()
-        val decoded = frames.frames(current.source.fileName, timestamps, EditorFrameSizes.TRIM_LOOP_MAX_SIDE_PX).toList()
+        val decoded = frames.frames(current.id, timestamps, EditorFrameSizes.TRIM_LOOP_MAX_SIDE_PX).toList()
         LoopState.Ready(decoded, durations, subjectFrames = 0, totalFrames = decoded.size)
     } catch (e: CancellationException) {
         throw e
