@@ -10,12 +10,12 @@ import androidx.core.content.FileProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.agency.stickerjet.data.FileProjectRepository
-import com.agency.stickerjet.data.ImportFailure
-import com.agency.stickerjet.data.ImportOutcome
 import com.agency.stickerjet.data.ImportService
 import com.agency.stickerjet.data.ProjectEnvelope
 import com.agency.stickerjet.data.ProjectFiles
 import com.agency.stickerjet.domain.ExportPlan
+import com.agency.stickerjet.domain.ImportFailure
+import com.agency.stickerjet.domain.ImportOutcome
 import com.agency.stickerjet.domain.ImportRejection
 import com.agency.stickerjet.domain.StickerLimits
 import com.agency.stickerjet.domain.StickerProject
