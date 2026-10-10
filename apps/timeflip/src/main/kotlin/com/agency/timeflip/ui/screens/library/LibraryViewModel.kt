@@ -63,6 +63,12 @@ class LibraryViewModel(
         observeLibrary()
     }
 
+    /** Subscribes again after a failed read. */
+    fun retry() {
+        _state.update { it.copy(content = LibraryContent.Loading) }
+        observeLibrary()
+    }
+
     private fun observeLibrary() {
         viewModelScope.launch {
             projects.observeProjects()
