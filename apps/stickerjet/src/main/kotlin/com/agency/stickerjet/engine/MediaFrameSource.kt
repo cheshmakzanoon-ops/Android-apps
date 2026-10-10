@@ -22,8 +22,8 @@ import kotlin.math.roundToInt
 /**
  * Decodes frames from a stored source clip with [MediaMetadataRetriever], one flow per call.
  *
- * - [sourceFor] maps the key given to [frames] to the clip file. The exporter passes the project id here,
- *   so the app wires `{ projectId -> files.sourceFile(projectId) }`.
+ * - [sourceFor] maps a project id to its source clip file, so the app wires
+ *   `{ projectId -> files.sourceFile(projectId) }`.
  * - Each timestamp is decoded with OPTION_CLOSEST. The display rotation from METADATA_KEY_VIDEO_ROTATION is
  *   applied by this class, not assumed to be applied by the platform.
  * - The frame is scaled so its longer side is at most [maxSidePx] and copied into an [ArgbFrame]. The
@@ -32,12 +32,12 @@ import kotlin.math.roundToInt
  *
  * Minimum SDK 26: getScaledFrameAtTime (API 27) is not used; scaling is done with a Canvas draw instead.
  */
-class MediaFrameSource(private val sourceFor: (String) -> File) : FrameSource {
+class MediaFrameSource(private val sourceFor: (projectId: String) -> File) : FrameSource {
 
-    override fun frames(sourceFileName: String, timestampsMs: List<Long>, maxSidePx: Int): Flow<ArgbFrame> = flow {
+    override fun frames(projectId: String, timestampsMs: List<Long>, maxSidePx: Int): Flow<ArgbFrame> = flow {
         require(maxSidePx > 0) { "maxSidePx must be positive" }
-        val file = sourceFor(sourceFileName)
-        if (!file.isFile) throw SourceMissingException(sourceFileName)
+        val file = sourceFor(projectId)
+        if (!file.isFile) throw SourceMissingException(projectId)
         val retriever = MediaMetadataRetriever()
         try {
             try {

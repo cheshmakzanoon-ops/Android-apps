@@ -25,22 +25,18 @@ ffmpeg -display_rotation:v:0 -90 -i upright.mp4 -c copy -movflags +faststart rot
 The `rotate=90` metadata tag was tried first and does not write a display matrix with ffmpeg 6.1.1,
 so it is not used.
 
-## Journey clip (`journey-clip.mp4`): NOT PROVIDED
+## Journey clip (`journey-clip.mp4`): synthetic, contains NO person
 
-The journey test needs a clip with one clearly visible person (H.264, 3 to 30 s, 720p or smaller, under
-2 MB). **No such clip exists in this work. None was fabricated.**
-
-- The repository and the build machine contain no video or photograph of a person (searched the whole
-  disk for mp4, webm, mov, mkv, 3gp, jpg and jpeg files).
-- The agent proxy denies every public media host tried (Wikimedia Commons, Pexels, Internet Archive,
-  samplelib, test-videos.co.uk) with HTTP 403 (egress policy), so no licensed clip could be downloaded.
-
-To close this gap, someone with a legally usable clip should add it here, with the source URL, author,
-licence and the consent basis for any identifiable person, and then update this file. A CC0 or
-public-domain clip is preferred. A clip recorded by the team needs written consent from the person shown.
-
-Consequence: segmentation quality on a human sample has not been measured anywhere in this work. CI or a
-device must do that before the feature is called validated.
+- File: `assets/source/journey-clip.mp4`. It is a byte-identical copy of `moving_subject_320x240_3s.mp4`
+  (SHA-256 `25ed8d81ad25dc9311ef2973459f3d653771e93445a087b7e1c532eaeeaf1fb4`), made with `cp`, not re-encoded.
+- Content: SYNTHETIC. An orange disc moves on a navy background. It contains NO person and no photograph or
+  footage of anyone.
+- `build.gradle.kts` maps `assets/source` into the androidTest assets, so the instrumented journey reads the
+  clip by its asset name `journey-clip.mp4`.
+- Consequence: the journey exercises only the NO-SUBJECT FALLBACK. The segmenter finds no person here, so the
+  masked path is not exercised. Segmentation quality is NOT validated by this clip. No legally usable clip with a
+  real person was available in this work, and public media hosts are blocked by the egress policy. Validating
+  segmentation needs a licensed clip with a person, checked by CI or on a device.
 
 ## WebP fixtures (`core/src/test/resources/webp/`)
 

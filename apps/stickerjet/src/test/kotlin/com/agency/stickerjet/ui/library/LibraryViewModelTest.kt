@@ -45,7 +45,7 @@ class LibraryViewModelTest {
             exports = listOf(record("a-old.webp", createdAtMs = 10L), record("a-new.webp", createdAtMs = 30L)),
         )
         val repository = InMemoryProjectRepository(listOf(withExports))
-        File(files.exportsDir("a")).mkdirs()
+        files.exportsDir("a").mkdirs()
         File(files.exportsDir("a"), "a-new.webp").writeBytes(ByteArray(4))
 
         val vm = LibraryViewModel(repository, files)

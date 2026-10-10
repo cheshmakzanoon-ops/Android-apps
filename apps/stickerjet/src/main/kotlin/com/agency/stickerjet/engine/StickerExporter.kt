@@ -1,6 +1,5 @@
 package com.agency.stickerjet.engine
 
-import com.agency.stickerjet.data.ProjectFiles
 import com.agency.stickerjet.domain.AlphaMask
 import com.agency.stickerjet.domain.ExportPlan
 import com.agency.stickerjet.domain.ExportRecord
@@ -28,19 +27,22 @@ import java.io.IOException
  * and muxes with [AnimatedWebpWriter]. The quality ladder 85, 70, 55, 40 is tried until the file fits
  * [StickerLimits.MAX_EXPORT_BYTES]. Later passes re-decode the frames but do not re-segment them.
  *
- * Publishing: the file is written to `<name>.part` in the exports directory of [files], renamed to its final name, and only
- * then is the record appended to the project. Cancellation or failure deletes the temporary and any published
- * file, and leaves the project draft as it was.
+ * Publishing: the file is first written to `<name>.part` in [tempDir], then renamed into the exports
+ * directory from [exportsDirFor]. If the two folders are on different filesystems the rename fails, and the
+ * file is copied to a staging `.part` beside the target before the final rename. The record is appended to the
+ * project only after publishing. Cancellation or failure deletes every partial and published file, and leaves
+ * the project draft as it was.
  *
- * [files] is the data layer's [ProjectFiles], as architecture section 3.4 specifies. It supplies the exports
- * directory. Frame timing comes from [ExportPlan] and file names from [StickerFileNamer].
+ * Frame timing comes from [ExportPlan] and file names from [StickerFileNamer]. The engine has no dependency on
+ * the data package: the app wires `exportsDirFor = { files.exportsDir(it) }` and `tempDir = files.tempDir()`.
  */
 class StickerExporter(
     private val frames: FrameSource,
     private val segmenter: SubjectSegmenter,
     private val encoder: FrameEncoder,
     private val repository: ProjectRepository,
-    private val files: ProjectFiles,
+    private val exportsDirFor: (projectId: String) -> File,
+    private val tempDir: File,
     private val clock: () -> Long,
 ) {
     private val captions = CaptionRenderer()
@@ -52,8 +54,9 @@ class StickerExporter(
      */
     suspend fun export(project: StickerProject, onProgress: (Float) -> Unit): ExportOutcome =
         withContext(Dispatchers.Default) {
-            val exportDir = files.exportsDir(project.id)
+            val exportDir = exportsDirFor(project.id)
             var temp: File? = null
+            var staged: File? = null
             var published: File? = null
             try {
                 onProgress(0f)
@@ -70,11 +73,20 @@ class StickerExporter(
                 }
                 val now = clock()
                 val name = StickerFileNamer.fileName(project.title, now, exportDir.list()?.toSet().orEmpty())
-                val part = File(exportDir, "$name.part")
+                val part = File(tempDir.apply { mkdirs() }, "$name.part")
                 temp = part
                 withContext(Dispatchers.IO) { writeFile(part, bytes) }
                 val target = File(exportDir, name)
-                if (!part.renameTo(target)) throw IOException("Could not publish $name")
+                if (!part.renameTo(target)) {
+                    // The temp folder can sit on another filesystem. Stage a copy beside the target, then rename it.
+                    val copy = File(exportDir, "$name.part")
+                    staged = copy
+                    withContext(Dispatchers.IO) { part.copyTo(copy, overwrite = true) }
+                    part.delete()
+                    temp = null
+                    if (!copy.renameTo(target)) throw IOException("Could not publish $name")
+                    staged = null
+                }
                 temp = null
                 published = target
 
@@ -89,20 +101,20 @@ class StickerExporter(
                 onProgress(1f)
                 ExportOutcome.Success(target, record, pipeline.subjectFrames, frameCount)
             } catch (cancelled: CancellationException) {
-                discard(temp, published)
+                discard(temp, staged, published)
                 throw cancelled
             } catch (missing: SourceMissingException) {
-                discard(temp, published)
+                discard(temp, staged, published)
                 ExportOutcome.Failed(ExportFailure.SOURCE_MISSING)
             } catch (failed: SegmentationFailedException) {
-                discard(temp, published)
+                discard(temp, staged, published)
                 ExportOutcome.Failed(ExportFailure.SEGMENTATION_FAILED)
             } catch (io: IOException) {
-                discard(temp, published)
+                discard(temp, staged, published)
                 val reason = if (isLowSpace(exportDir)) ExportFailure.LOW_STORAGE else ExportFailure.INTERNAL
                 ExportOutcome.Failed(reason)
             } catch (error: Exception) {
-                discard(temp, published)
+                discard(temp, staged, published)
                 ExportOutcome.Failed(ExportFailure.INTERNAL)
             }
         }

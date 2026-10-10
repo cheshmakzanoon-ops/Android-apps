@@ -101,7 +101,8 @@ class StickerJourneyTest {
         segmenter = MlKitSubjectSegmenter(),
         encoder = FrameEncoder(),
         repository = repository,
-        files = files,
+        exportsDirFor = { projectId -> files.exportsDir(projectId) },
+        tempDir = files.tempDir(),
         clock = clock,
     )
 
