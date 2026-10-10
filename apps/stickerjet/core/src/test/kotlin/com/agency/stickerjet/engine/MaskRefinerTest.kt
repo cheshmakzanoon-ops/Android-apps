@@ -83,10 +83,10 @@ class MaskRefinerTest {
 
     @Test
     fun negativeRadiusActsAsATap() {
-        // 0.525 of 20 px is 10.5 px, the centre of pixel (10, 10); a zero radius still paints that pixel.
+        // A zero radius is floored to 2 px, so a tap paints the pixel under it and survives the blur.
         val mask = MaskRefiner.refine(zeros(20, 20), 20, 20, listOf(stroke(StrokeMode.RESTORE, 0.525f, 0.525f, -3f)))
         assertEquals(255, mask.at(10, 10), "the pixel under the tap is painted")
-        assertEquals(0, mask.at(0, 0))
+        assertEquals(0, mask.at(0, 0), "a tap is local")
     }
 
     @Test

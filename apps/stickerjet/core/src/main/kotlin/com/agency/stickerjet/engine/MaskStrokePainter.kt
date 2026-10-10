@@ -9,8 +9,11 @@ import kotlin.math.max
 /** Paints one [MaskStroke] into a float alpha buffer (0..1) as a union of capsules, one per segment. */
 internal object MaskStrokePainter {
 
-    /** A tap is at least half a pixel, so a single point always covers the pixel under it. */
-    private const val MIN_RADIUS_PX = 0.5f
+    /**
+     * A tap is at least 2 px in radius. Smaller discs vanish under the 1-pixel edge blur in [MaskSmoothing],
+     * so a single point would paint nothing.
+     */
+    private const val MIN_RADIUS_PX = 2f
 
     fun paint(stroke: MaskStroke, width: Int, height: Int, shorterSide: Float, alpha: FloatArray) {
         if (stroke.points.isEmpty()) return
