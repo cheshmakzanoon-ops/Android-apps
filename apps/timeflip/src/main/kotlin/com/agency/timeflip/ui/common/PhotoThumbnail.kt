@@ -23,6 +23,18 @@ import com.agency.timeflip.ui.theme.TimeFlipColor
 import com.agency.timeflip.ui.theme.TimeFlipRadius
 
 /**
+ * A bounded bitmap of a photo copy, or null while it loads or when the copy is missing. Used by the
+ * alignment canvas and the editor preview; the decode size is capped by [maxEdge].
+ */
+@Composable
+fun rememberPhotoBitmap(photoId: PhotoId?, loader: BitmapLoader, maxEdge: Int): Bitmap? {
+    val bitmap by produceState<Bitmap?>(initialValue = null, photoId, loader, maxEdge) {
+        value = if (photoId == null) null else loader.decode(photoId, maxEdge)
+    }
+    return bitmap
+}
+
+/**
  * A decoded, downscaled preview of a photo copy. The decode is bounded by [maxEdge], so memory stays
  * small. While it loads, or when the copy is missing, a neutral placeholder is shown.
  */

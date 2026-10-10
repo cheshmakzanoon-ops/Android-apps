@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.agency.timeflip.ui.TimeFlipApp
-import com.agency.timeflip.ui.TimeFlipTheme
 
 /**
  * The only Activity. It keeps no state of its own: rotation and process death are handled by the
@@ -19,9 +18,7 @@ class MainActivity : ComponentActivity() {
 
         val container = (application as TimeFlipApplication).container
         setContent {
-            TimeFlipTheme {
-                TimeFlipApp(container)
-            }
+            TimeFlipApp(container)
         }
     }
 }

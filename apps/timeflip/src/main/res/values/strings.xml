@@ -1,4 +1,210 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Every user-visible string of the app. Labels that instrumented tests wait for are marked "test label". -->
     <string name="app_name">TimeFlip</string>
+
+    <!-- Common -->
+    <string name="common_back_cd">Back</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_dismiss">Dismiss</string>
+    <string name="common_done">Done</string>
+    <string name="common_redo_cd">Redo</string>
+    <string name="common_undo_cd">Undo</string>
+    <string name="common_retry">Retry</string>
+    <string name="common_seconds">%1$.1f s</string>
+
+    <!-- Errors, one message and one next step per category -->
+    <string name="error_unexpected_message">Something unexpected went wrong.</string>
+    <string name="error_unexpected_next">Try again. If it keeps happening, restart the app.</string>
+    <string name="error_unsupported_format_message">This file is not a photo format TimeFlip can use.</string>
+    <string name="error_unsupported_format_next">Choose a JPEG, PNG or HEIC photo instead.</string>
+    <string name="error_decode_failed_message">This photo could not be read.</string>
+    <string name="error_decode_failed_next">Try again, or choose a different photo.</string>
+    <string name="error_source_missing_message">The saved copy of this photo is missing.</string>
+    <string name="error_source_missing_next">Choose the photo again to continue.</string>
+    <string name="error_permission_denied_message">TimeFlip could not get access to this photo.</string>
+    <string name="error_permission_denied_next">Try again and allow access in the photo picker, or choose another photo.</string>
+    <string name="error_storage_full_message">There is not enough free storage on this device.</string>
+    <string name="error_storage_full_next">Free some space, then try again.</string>
+    <string name="error_encoder_unavailable_message">This device cannot encode a video at this size.</string>
+    <string name="error_encoder_unavailable_next">Try again, or choose a smaller output size in the editor.</string>
+    <string name="error_export_failed_message">The video could not be exported.</string>
+    <string name="error_export_failed_next">Try again. Your photos and settings are unchanged.</string>
+    <string name="error_invalid_project_message">This transformation\'s saved data cannot be opened.</string>
+    <string name="error_invalid_project_next">Delete it from the library and create it again.</string>
+    <string name="error_not_found_message">This item no longer exists.</string>
+    <string name="error_not_found_next">Return to the library.</string>
+
+    <!-- Welcome -->
+    <string name="welcome_title">Welcome</string>
+    <string name="welcome_intro">TimeFlip turns two photos into a short before-and-after video you can share.</string>
+    <string name="welcome_point_device">Photos and exported videos stay on this device. Nothing is uploaded.</string>
+    <string name="welcome_point_account">No account or sign-in is needed.</string>
+    <string name="welcome_point_permissions">TimeFlip asks for no internet, storage or camera access.</string>
+    <string name="welcome_before_label">Before</string>
+    <string name="welcome_after_label">After</string>
+    <string name="welcome_start">Start</string>
+
+    <!-- Library -->
+    <string name="library_settings_cd">Settings</string>
+    <string name="library_empty_title">No transformations yet</string>
+    <string name="library_empty_body">Choose two photos to make a before-and-after video. Your photos stay on this device.</string>
+    <string name="library_new">New transformation</string>
+    <string name="library_loading">Loading transformations</string>
+    <string name="library_row_meta">Updated %1$s · %2$s</string>
+    <string name="library_row_more_cd">More actions for %1$s</string>
+    <string name="library_menu_rename">Rename</string>
+    <string name="library_menu_duplicate">Duplicate</string>
+    <string name="library_menu_delete">Delete</string>
+    <string name="library_rename_title">Rename transformation</string>
+    <string name="library_rename_label">Name</string>
+    <string name="library_rename_limit">Up to %1$d characters</string>
+    <string name="library_rename_confirm">Save</string>
+    <string name="library_delete_title">Delete this transformation?</string>
+    <string name="library_delete_body">This deletes %1$s, its photo copies and its exported videos from this device. It cannot be undone.</string>
+    <string name="library_delete_confirm">Delete</string>
+    <string name="library_msg_renamed">Transformation renamed.</string>
+    <string name="library_msg_deleted">Transformation deleted.</string>
+    <string name="library_msg_duplicated">Transformation duplicated.</string>
+    <string name="library_msg_failed">That did not work. Nothing was changed.</string>
+    <string name="library_msg_missing">This transformation no longer exists.</string>
+    <plurals name="library_exports">
+        <item quantity="one">%1$d export</item>
+        <item quantity="other">%1$d exports</item>
+    </plurals>
+
+    <!-- New pair (photo choice) -->
+    <string name="new_pair_title">Before and after</string>
+    <string name="new_pair_edit_title">Change photos</string>
+    <string name="new_pair_hint">Choose the photo from before the change first, then the photo from after it. Each photo is copied to this device.</string>
+    <string name="new_pair_edit_hint">Replace a photo or swap them. Changing a photo clears its alignment, so you will align it again.</string>
+    <string name="new_pair_before_label">Before</string>
+    <string name="new_pair_after_label">After</string>
+    <string name="new_pair_choose_before">Choose before photo</string>
+    <string name="new_pair_choose_after">Choose after photo</string>
+    <string name="new_pair_replace_before">Replace before photo</string>
+    <string name="new_pair_replace_after">Replace after photo</string>
+    <string name="new_pair_remove">Remove</string>
+    <string name="new_pair_swap">Swap photos</string>
+    <string name="new_pair_continue">Continue</string>
+    <string name="new_pair_loading">Loading transformation</string>
+    <string name="new_pair_importing">Copying photo to this device</string>
+    <string name="new_pair_saving">Creating transformation</string>
+    <string name="new_pair_no_photo">No photo yet</string>
+    <string name="new_pair_slot_missing">The saved copy of this photo is missing. Choose it again.</string>
+    <string name="new_pair_before_preview_cd">Before photo preview</string>
+    <string name="new_pair_after_preview_cd">After photo preview</string>
+    <string name="new_pair_photo_ready_cd">Photo chosen</string>
+
+    <!-- Alignment review -->
+    <string name="align_title">Check alignment</string>
+    <string name="align_intro">TimeFlip places the after photo over the before photo. Check the result before you export.</string>
+    <string name="align_saved_none">Saved alignment: none</string>
+    <string name="align_saved_automatic">Saved alignment: automatic</string>
+    <string name="align_saved_manual">Saved alignment: manual</string>
+    <string name="align_running">Aligning the photos</string>
+    <string name="align_running_hint">Matching edges and textures on this device. Nothing is uploaded.</string>
+    <string name="align_cancel">Cancel alignment</string>
+    <string name="align_not_run">Automatic alignment has not run yet.</string>
+    <string name="align_run">Run automatic alignment</string>
+    <string name="align_cancelled">Alignment was cancelled. Run it again, or adjust the placement by hand.</string>
+    <string name="align_confidence">Confidence %1$d%%</string>
+    <string name="align_threshold_note">Matches of %1$d%% or more are accepted automatically.</string>
+    <string name="align_status_accepted">Automatic alignment looks reliable</string>
+    <string name="align_status_needs_manual">Low confidence: the photos may not match</string>
+    <string name="align_status_failed">No usable automatic alignment</string>
+    <string name="align_meaning_accepted">The photos matched well. Check the overlay in the editor before you export.</string>
+    <string name="align_meaning_needs_manual">The photos may be too different for automatic matching. Adjust the placement by hand, and check it carefully.</string>
+    <string name="align_meaning_failed">The automatic alignment could not run on these photos. Adjust the placement by hand.</string>
+    <string name="align_open_editor">Open editor</string>
+    <string name="align_open_without_estimate">Opens the editor without the automatic placement.</string>
+    <string name="align_adjust">Adjust manually</string>
+    <string name="align_reset">Reset alignment</string>
+    <string name="align_change_photos">Change photos</string>
+    <string name="align_choose_photos_again">Choose photos again</string>
+
+    <!-- Manual alignment -->
+    <string name="manual_title">Adjust placement</string>
+    <string name="manual_gesture_hint">Drag to move. Pinch to zoom. Twist to rotate. Each gesture can be undone.</string>
+    <string name="manual_overlay_label">Overlay opacity</string>
+    <string name="manual_divider_label">Comparison position</string>
+    <string name="manual_divider_cd">Comparison divider</string>
+    <string name="manual_scale_label">Scale</string>
+    <string name="manual_scale_value">%1$.2f×</string>
+    <string name="manual_rotation_label">Rotation</string>
+    <string name="manual_rotation_value">%1$.1f°</string>
+    <string name="manual_percent_value">%1$d%%</string>
+    <string name="manual_reset">Reset</string>
+    <string name="manual_fit">Fit</string>
+    <string name="manual_coverage_warning">The photo does not cover the whole frame, so the video would show empty edges. Zoom in, move the photo, or tap Fit.</string>
+    <string name="manual_saved">Saved</string>
+    <string name="manual_saving">Saving</string>
+    <string name="manual_save_failed">Not saved. Tap Done to try again.</string>
+
+    <!-- Editor -->
+    <string name="editor_title">Preview</string>
+    <string name="editor_hint">The preview uses the same timing and transition as the exported video.</string>
+    <string name="editor_loading">Loading preview</string>
+    <string name="editor_preview_cd">Transition preview</string>
+    <string name="editor_play_cd">Play</string>
+    <string name="editor_pause_cd">Pause</string>
+    <string name="editor_replay_cd">Replay</string>
+    <string name="editor_timeline_cd">Timeline position</string>
+    <string name="editor_position">%1$s of %2$s</string>
+    <string name="editor_transition_heading">Transition</string>
+    <string name="editor_duration_label">Duration</string>
+    <string name="editor_easing_heading">Easing</string>
+    <string name="editor_easing_linear">Linear</string>
+    <string name="editor_easing_in_out">Ease in and out</string>
+    <string name="editor_easing_out">Ease out</string>
+    <string name="editor_reverse">Reverse direction</string>
+    <string name="editor_output_heading">Output size</string>
+    <string name="editor_adjust_alignment">Adjust alignment</string>
+    <string name="editor_change_photos">Change photos</string>
+    <string name="editor_export">Export</string>
+    <string name="transition_horizontal">Horizontal reveal</string>
+    <string name="transition_vertical">Vertical reveal</string>
+    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_wipe">Directional wipe</string>
+    <string name="preset_portrait_720">720p portrait</string>
+    <string name="preset_portrait_1080">1080p portrait</string>
+    <string name="preset_square_1080">1080p square</string>
+    <string name="preset_landscape_1080">1080p landscape</string>
+
+    <!-- Export -->
+    <string name="export_title">Export video</string>
+    <string name="export_summary">%1$s, %2$d fps, %3$s, silent MP4</string>
+    <string name="export_ready">Ready to export. The video is saved on this device.</string>
+    <string name="export_start">Start export</string>
+    <string name="export_rendering">Rendering frame %1$d of %2$d</string>
+    <string name="export_progress_cd">Export progress</string>
+    <string name="export_recording">Checking the video and saving it</string>
+    <string name="export_cancel">Cancel export</string>
+    <string name="export_success_title">Video exported</string>
+    <string name="export_success_body">The video is saved on this device. Share it to send it to another app.</string>
+    <string name="export_share">Share</string>
+    <string name="export_cancelled_title">Export cancelled</string>
+    <string name="export_cancelled_body">No video was kept. You can start the export again.</string>
+    <string name="export_share_failed">No app could open this video. Check that a video app is installed.</string>
+    <string name="export_leave_title">Stop exporting?</string>
+    <string name="export_leave_body">Leaving now cancels the export. No video will be kept.</string>
+    <string name="export_leave_confirm">Stop and leave</string>
+    <string name="export_history_heading">Previous exports</string>
+    <string name="export_history_item">%1$s, %2$s</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_privacy_heading">Privacy</string>
+    <string name="settings_privacy_device">Photos, projects and exported videos stay on this device.</string>
+    <string name="settings_privacy_no_upload">Nothing is uploaded. TimeFlip has no servers and no analytics.</string>
+    <string name="settings_privacy_no_account">No account or sign-in is needed.</string>
+    <string name="settings_privacy_permissions">TimeFlip asks for no internet, storage or camera permission. You choose photos with the system photo picker.</string>
+    <string name="settings_data_heading">Your data</string>
+    <string name="settings_delete_explain">Deleting removes every transformation, photo copy and exported video from this device.</string>
+    <string name="settings_delete_all">Delete all data</string>
+    <string name="settings_delete_title">Delete all data?</string>
+    <string name="settings_delete_body">This deletes every transformation, photo copy and exported video on this device. It cannot be undone.</string>
+    <string name="settings_delete_confirm">Delete everything</string>
+    <string name="settings_deleting">Deleting</string>
+    <string name="settings_deleted">All transformations, photo copies and exported videos were deleted.</string>
 </resources>

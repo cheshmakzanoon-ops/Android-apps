@@ -12,15 +12,15 @@ object Routes {
     const val LIBRARY = "library"
     const val SETTINGS = "settings"
 
+    /** True when manual alignment was opened from the alignment review, so Done continues to the editor. */
+    const val ARG_WIZARD = "wizard"
+
     /** Optional project id. Without it the screen creates a new transformation. */
     const val NEW_PAIR = "newPair?$ROUTE_ARG_PROJECT_ID={$ROUTE_ARG_PROJECT_ID}"
     const val ALIGN_REVIEW = "alignReview/{$ROUTE_ARG_PROJECT_ID}"
     const val MANUAL_ALIGN = "manualAlign/{$ROUTE_ARG_PROJECT_ID}?$ARG_WIZARD={$ARG_WIZARD}"
     const val EDITOR = "editor/{$ROUTE_ARG_PROJECT_ID}"
     const val EXPORT = "export/{$ROUTE_ARG_PROJECT_ID}"
-
-    /** True when manual alignment was opened from the alignment review, so Done continues to the editor. */
-    const val ARG_WIZARD = "wizard"
 
     fun newPair(projectId: ProjectId? = null): String =
         if (projectId == null) "newPair" else "newPair?$ROUTE_ARG_PROJECT_ID=${projectId.value}"
