@@ -27,10 +27,11 @@ data class RecoveryReport(
 )
 
 /**
- * Startup cleanup for interrupted imports, exports and thumbnails. Run it once per process, before any
- * import or export starts. It is safe to repeat:
+ * Startup cleanup for interrupted imports, exports and thumbnails. Run it once per process at startup.
+ * The app runs it in the background, so it may overlap a new import or export. Ordering does not protect
+ * those operations. Files younger than [StorageLayout.IN_FLIGHT_GRACE_MS] do. It is safe to repeat:
  * - It never deletes project, photo or export rows.
- * - Files younger than [StorageLayout.IN_FLIGHT_GRACE_MS] are kept, so an operation that is still running is not disturbed.
+ * - Files younger than the grace period are kept, so an operation that is still running is not disturbed.
  * - Only files that match TimeFlip's own names are touched. Other files are left alone.
  */
 class StorageRecovery(
@@ -56,7 +57,7 @@ class StorageRecovery(
         for (file in photosDir.listFiles().orEmpty()) {
             if (!file.isFile || !isOlderThan(file, now, StorageLayout.IN_FLIGHT_GRACE_MS)) continue
             val name = file.name
-            if (name.endsWith(StorageLayout.TEMP_SUFFIX)) {
+            if (StorageLayout.isUnfinished(name)) {
                 if (file.delete()) tempRemoved++
             } else if (name.endsWith(StorageLayout.PHOTO_EXTENSION)) {
                 val id = name.removeSuffix(StorageLayout.PHOTO_EXTENSION)
@@ -66,7 +67,7 @@ class StorageRecovery(
 
         for (file in exportsDir.listFiles().orEmpty()) {
             if (!file.isFile || !isOlderThan(file, now, StorageLayout.IN_FLIGHT_GRACE_MS)) continue
-            if (file.name.endsWith(StorageLayout.TEMP_SUFFIX)) {
+            if (StorageLayout.isUnfinished(file.name)) {
                 if (file.delete()) tempRemoved++
             } else if (file.name !in referencedExports) {
                 if (file.delete()) unreferencedRemoved++
@@ -77,7 +78,7 @@ class StorageRecovery(
             if (!file.isFile) continue
             val sourceId = StorageLayout.thumbnailSourceId(file.name)
             val expired = when {
-                file.name.endsWith(StorageLayout.TEMP_SUFFIX) -> isOlderThan(file, now, StorageLayout.IN_FLIGHT_GRACE_MS)
+                StorageLayout.isUnfinished(file.name) -> isOlderThan(file, now, StorageLayout.IN_FLIGHT_GRACE_MS)
                 sourceId == null -> false
                 else -> isOlderThan(file, now, THUMBNAIL_MAX_AGE_MS) || !copyExists(photosDir, sourceId)
             }

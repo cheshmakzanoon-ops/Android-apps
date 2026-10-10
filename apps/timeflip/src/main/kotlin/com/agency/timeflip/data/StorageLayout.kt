@@ -22,6 +22,12 @@ internal object StorageLayout {
     /** Any file with this suffix is an unfinished write and is removed by recovery. */
     const val TEMP_SUFFIX = ".tmp"
 
+    /** Partial MP4 written by the export engine. Recovery treats it as unfinished. */
+    const val PARTIAL_EXPORT_SUFFIX = ".part"
+
+    fun isUnfinished(fileName: String): Boolean =
+        fileName.endsWith(TEMP_SUFFIX) || fileName.endsWith(PARTIAL_EXPORT_SUFFIX)
+
     /**
      * Temp files and unreferenced copies younger than this may belong to an operation that is still
      * running, so recovery keeps them.
