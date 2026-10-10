@@ -1,0 +1,261 @@
+# TimeFlip CI. Path-filtered to the TimeFlip app and the shared build files.
+#
+# Jobs:
+#   validate        lint, unit tests, debug APK and an UNSIGNED release bundle (no secrets)
+#   instrumented    connected tests on an API 34 emulator, then ffprobe checks on the exported MP4
+#   mp4-verify      gate on the instrumented job's MP4 verdict, plus the verifier's own self-test
+#
+# Why the MP4 check runs inside "instrumented": the MP4 exists only on that job's emulator and runner.
+# Binary artifacts are not uploaded (the debug APK is the only uploaded binary), and jobs do not share
+# files. So the pull and the ffprobe check run in the same job, and mp4-verify reads the outcome as a
+# job output. A missing or unverified MP4 fails both jobs.
+#
+# Not verified until the first run on GitHub Actions. This file was written without access to the
+# Android SDK, Google Maven or the emulator.
+
+name: TimeFlip CI
+
+on:
+  push:
+    paths:
+      - 'apps/timeflip/**'
+      - 'gradle/**'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/timeflip.yml'
+  pull_request:
+    paths:
+      - 'apps/timeflip/**'
+      - 'gradle/**'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/timeflip.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: timeflip-validate-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # Reason: compileSdk and targetSdk are 36, and AGP needs build-tools 36.0.0. The hosted image may
+      # not ship both, so install them only when they are missing.
+      - name: Ensure Android platform 36 and build-tools 36.0.0
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          if [ -z "$SDK" ]; then
+            echo "::error::No Android SDK location is set on this runner"
+            exit 1
+          fi
+          if [ -d "$SDK/platforms/android-36" ] && [ -d "$SDK/build-tools/36.0.0" ]; then
+            echo "Android platform 36 and build-tools 36.0.0 are already installed"
+            exit 0
+          fi
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          if [ -z "$SDKMANAGER" ]; then
+            SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          if [ ! -x "$SDKMANAGER" ]; then
+            echo "::error::sdkmanager was not found on this runner"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" --install "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Lint, unit tests, debug APK and unsigned release bundle
+        run: ./gradlew :apps:timeflip:lintDebug :apps:timeflip:testDebugUnitTest :apps:timeflip:assembleDebug :apps:timeflip:bundleRelease --stacktrace
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: timeflip-debug-apk
+          path: apps/timeflip/build/outputs/apk/debug/*.apk
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload reports and unit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timeflip-validate-reports
+          path: |
+            apps/timeflip/build/reports
+            apps/timeflip/build/test-results
+          retention-days: 14
+          if-no-files-found: warn
+
+  instrumented:
+    name: instrumented (API 34 emulator)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: timeflip-instrumented-${{ github.ref }}
+      cancel-in-progress: true
+    outputs:
+      mp4_verified: ${{ steps.verify_mp4.outputs.mp4_verified }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Enable KVM for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # Same reason as in validate: compileSdk 36 needs platform 36 on this host, even though the
+      # emulator image is API 34.
+      - name: Ensure Android platform 36 and build-tools 36.0.0
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          if [ -z "$SDK" ]; then
+            echo "::error::No Android SDK location is set on this runner"
+            exit 1
+          fi
+          if [ -d "$SDK/platforms/android-36" ] && [ -d "$SDK/build-tools/36.0.0" ]; then
+            echo "Android platform 36 and build-tools 36.0.0 are already installed"
+            exit 0
+          fi
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          if [ -z "$SDKMANAGER" ]; then
+            SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          if [ ! -x "$SDKMANAGER" ]; then
+            echo "::error::sdkmanager was not found on this runner"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" --install "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Install ffmpeg (ffprobe) for MP4 verification
+        run: |
+          if command -v ffprobe > /dev/null 2>&1; then
+            ffprobe -version | head -1
+            exit 0
+          fi
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffprobe -version | head -1
+
+      # The emulator image is API 34 for now. API 36 coverage is a follow-up, because that system image
+      # must exist on the hosted runner before it can be requested here.
+      #
+      # The script reads the journey test's output from the debug app's private folder with run-as
+      # (the debug build is debuggable). The exported MP4 never leaves the runner. Only a short
+      # pass/fail verdict is passed on, through a job output.
+      - name: Run instrumented tests on the emulator and collect the exported MP4
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            ./gradlew :apps:timeflip:connectedDebugAndroidTest --stacktrace
+            mkdir -p "$RUNNER_TEMP/timeflip-mp4"
+            adb exec-out run-as com.agency.timeflip cat /data/user/0/com.agency.timeflip/files/journey-output/journey.mp4 > "$RUNNER_TEMP/timeflip-mp4/journey.mp4"
+            adb exec-out run-as com.agency.timeflip cat /data/user/0/com.agency.timeflip/files/journey-output/journey.json > "$RUNNER_TEMP/timeflip-mp4/journey.json"
+            test -s "$RUNNER_TEMP/timeflip-mp4/journey.mp4"
+            test -s "$RUNNER_TEMP/timeflip-mp4/journey.json"
+
+      - name: Verify the exported MP4 with ffprobe
+        id: verify_mp4
+        run: |
+          DIR="$RUNNER_TEMP/timeflip-mp4"
+          if [ ! -s "$DIR/journey.mp4" ] || [ ! -s "$DIR/journey.json" ]; then
+            echo "::error::The journey test did not leave journey.mp4 and journey.json. The MP4 check cannot pass."
+            exit 1
+          fi
+          WIDTH=$(jq -r '.width' "$DIR/journey.json")
+          HEIGHT=$(jq -r '.height' "$DIR/journey.json")
+          FPS=$(jq -r '.fps' "$DIR/journey.json")
+          DURATION_MS=$(jq -r '.durationMs' "$DIR/journey.json")
+          python3 apps/timeflip/benchmarks/tools/verify_mp4.py "$DIR/journey.mp4" \
+            --width "$WIDTH" --height "$HEIGHT" --fps "$FPS" --duration-ms "$DURATION_MS" \
+            --check-content
+          echo "mp4_verified=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload instrumented test results and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timeflip-instrumented-reports
+          path: |
+            apps/timeflip/build/outputs/androidTest-results
+            apps/timeflip/build/reports
+          retention-days: 14
+          if-no-files-found: warn
+
+  mp4-verify:
+    name: mp4-verify
+    needs: instrumented
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: timeflip-mp4-verify-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      # Gate: passes only when the instrumented job's MP4 verification succeeded. If the journey wrote no
+      # file, or the file failed a check, this job fails too.
+      - name: Require a verified journey MP4 from the instrumented job
+        env:
+          MP4_VERIFIED: ${{ needs.instrumented.outputs.mp4_verified }}
+        run: |
+          if [ "$MP4_VERIFIED" != "true" ]; then
+            echo "::error::The instrumented job did not produce and verify an exported MP4. See its emulator and verification steps."
+            exit 1
+          fi
+          echo "The instrumented job verified the journey MP4 with ffprobe."
+
+      - name: Install ffmpeg (ffprobe)
+        run: |
+          if command -v ffprobe > /dev/null 2>&1; then
+            ffprobe -version | head -1
+            exit 0
+          fi
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffprobe -version | head -1
+
+      # Offline self-test of the verifier on a tiny generated fixture. It downloads nothing.
+      - name: Verifier self-test
+        run: python3 apps/timeflip/benchmarks/tools/verify_mp4.py --self-test
