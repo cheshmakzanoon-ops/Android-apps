@@ -48,14 +48,24 @@ internal class ResolverClipSource(
 ) : ClipSource {
 
     /**
-     * Reads the size and the display name in one query. If the query fails or returns nothing, the
-     * result is an unknown size and an empty name. Access problems then surface when the stream opens.
+     * Reads the size and the display name in one query. If the query or the cursor fails, or returns
+     * nothing, the result is an unknown size and an empty name. Access problems then surface when the
+     * stream opens.
      */
     override fun describe(): ClipInfo {
-        val cursor = queryOrNull() ?: return ClipInfo(sizeBytes = null, displayName = "")
+        val info = try {
+            readRow()
+        } catch (e: RuntimeException) {
+            null
+        }
+        return info ?: ClipInfo(sizeBytes = null, displayName = "")
+    }
+
+    private fun readRow(): ClipInfo? {
+        val cursor = queryOrNull() ?: return null
         return cursor.use { row ->
             if (!row.moveToFirst()) {
-                ClipInfo(sizeBytes = null, displayName = "")
+                null
             } else {
                 ClipInfo(
                     sizeBytes = row.longOrNull(OpenableColumns.SIZE)?.takeIf { it >= 0 },

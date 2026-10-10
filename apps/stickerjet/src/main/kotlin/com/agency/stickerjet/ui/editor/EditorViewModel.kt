@@ -10,9 +10,7 @@ import com.agency.stickerjet.domain.NormalizedPoint
 import com.agency.stickerjet.domain.ProjectRepository
 import com.agency.stickerjet.domain.StrokeMode
 import com.agency.stickerjet.domain.SubjectSegmenter
-import com.agency.stickerjet.domain.Transform
 import com.agency.stickerjet.domain.withCaption
-import com.agency.stickerjet.domain.withTransform
 import com.agency.stickerjet.ui.navigation.Routes
 import com.agency.stickerjet.ui.ports.ExportPort
 import com.agency.stickerjet.ui.ports.MaskRefinementPort
@@ -21,6 +19,7 @@ import com.agency.stickerjet.ui.ports.ProjectFilesPort
 import com.agency.stickerjet.ui.ports.StoragePort
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -58,7 +57,7 @@ class EditorViewModel(
     )
 
     /** Everything the editor draws. */
-    val state: StateFlow<EditorUiState> get() = session.state
+    val state: StateFlow<EditorUiState> = session.state
 
     private var exportJob: Job? = null
 
@@ -69,7 +68,7 @@ class EditorViewModel(
 
     /** Switches tab and prepares whatever that tab needs. */
     fun selectTab(tab: EditorTab) {
-        session.state.value.let { session.state.value = it.copy(tab = tab) }
+        session.state.update { it.copy(tab = tab) }
         viewModelScope.launch { session.enterTab(tab) }
     }
 
@@ -100,16 +99,12 @@ class EditorViewModel(
 
     /** Quarter-turn rotation, committed as one step. */
     fun rotate() {
-        viewModelScope.launch {
-            session.commitIfPresent { p ->
-                p.withTransform(p.transform.copy(quarterTurns = (p.transform.quarterTurns + 1) % QUARTER_TURNS), p.updatedAtMs.coerceAtLeast(0L).let { session.now })
-            }
-        }
+        viewModelScope.launch { session.rotateQuarterTurn() }
     }
 
     /** Returns scale, position and rotation to their defaults. */
     fun resetPlacement() {
-        viewModelScope.launch { session.commitIfPresent { p -> p.withTransform(Transform(), session.now) } }
+        viewModelScope.launch { session.resetPlacement() }
     }
 
     /** Turns background removal on or off. */
@@ -178,16 +173,15 @@ class EditorViewModel(
     fun cancelExport() {
         exportJob?.cancel()
         exportJob = null
-        session.state.value.let { session.state.value = it.copy(export = ExportState.Idle) }
+        session.state.update { it.copy(export = ExportState.Idle) }
     }
 
     /** Closes an export result or failure, so the user can keep editing. */
     fun dismissExport() {
-        session.state.value.let { session.state.value = it.copy(export = ExportState.Idle) }
+        session.state.update { it.copy(export = ExportState.Idle) }
     }
 
     private companion object {
-        const val QUARTER_TURNS: Int = 4
         const val MAX_ARGB: Long = 0xFFFF_FFFFL
     }
 }

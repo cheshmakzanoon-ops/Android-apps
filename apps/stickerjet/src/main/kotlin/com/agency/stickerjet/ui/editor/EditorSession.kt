@@ -9,6 +9,7 @@ import com.agency.stickerjet.domain.StickerLimits
 import com.agency.stickerjet.domain.StickerProject
 import com.agency.stickerjet.domain.SubjectSegmenter
 import com.agency.stickerjet.domain.TrimPolicy
+import com.agency.stickerjet.domain.Transform
 import com.agency.stickerjet.domain.withBackground
 import com.agency.stickerjet.domain.withCaption
 import com.agency.stickerjet.domain.withTransform
@@ -157,6 +158,18 @@ internal class EditorSession(
         commitIfPresent { p -> p.withBackground(mode, now) }
     }
 
+    /** Rotates the sticker by one quarter turn. The domain normalizes the turn count. */
+    suspend fun rotateQuarterTurn() {
+        commitIfPresent { p ->
+            p.withTransform(p.transform.copy(quarterTurns = (p.transform.quarterTurns + 1) % QUARTER_TURNS), now)
+        }
+    }
+
+    /** Returns scale, position and rotation to their defaults. */
+    suspend fun resetPlacement() {
+        commitIfPresent { p -> p.withTransform(Transform(), now) }
+    }
+
     /** Commits the caption text. The domain normalizes it, so spaces typed at the edges are removed here. */
     suspend fun commitCaptionText(text: String) {
         commitIfPresent { p -> p.withCaption(p.caption.copy(text = text), now) }
@@ -212,5 +225,9 @@ internal class EditorSession(
             false
         }
         state.update { it.copy(saveFailed = !ok) }
+    }
+
+    private companion object {
+        const val QUARTER_TURNS: Int = 4
     }
 }
