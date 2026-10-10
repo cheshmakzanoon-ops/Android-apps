@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Projects hold private user videos. Auto-backup is disabled in the manifest, so nothing is
+     uploaded to a cloud backup. This file exists only because the attribute must reference one. -->
+<full-backup-content>
+    <exclude domain="root" path="." />
+</full-backup-content>

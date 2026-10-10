@@ -1,0 +1,105 @@
+name: StickerJet CI
+
+# Authoritative Android verification runs here, on GitHub-hosted runners whose Android SDK and
+# Google Maven access are available. Pushes that touch only other apps do not start this workflow.
+on:
+  push:
+    branches: [main, "claude/**"]
+    paths:
+      - "apps/stickerjet/**"
+      - "gradle/**"
+      - "gradle.properties"
+      - "settings.gradle.kts"
+      - "build.gradle.kts"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/stickerjet.yml"
+  pull_request:
+    paths:
+      - "apps/stickerjet/**"
+      - "gradle/**"
+      - "gradle.properties"
+      - "settings.gradle.kts"
+      - "build.gradle.kts"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/stickerjet.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stickerjet-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core-tests:
+    name: Core JVM tests (domain, codec, mask math)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Run core tests
+        run: ./gradlew :apps:stickerjet-core:test --console=plain
+      - name: Upload core test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stickerjet-core-test-reports
+          path: apps/stickerjet/core/build/reports/tests/
+          retention-days: 14
+
+  android:
+    name: Android unit tests, lint, debug APK and release AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build, unit test and lint
+        run: >-
+          ./gradlew
+          :apps:stickerjet:testDebugUnitTest
+          :apps:stickerjet:lintDebug
+          :apps:stickerjet:assembleDebug
+          :apps:stickerjet:bundleRelease
+          --console=plain --stacktrace
+      - name: Verify the merged debug manifest requests no INTERNET permission
+        run: |
+          manifest=$(find apps/stickerjet/build/intermediates -path '*merged_manifests/debug*' -name AndroidManifest.xml | head -n 1)
+          test -n "$manifest" || { echo "Merged debug manifest not found"; exit 1; }
+          if grep -q 'android.permission.INTERNET' "$manifest"; then
+            echo "INTERNET permission found in $manifest"; exit 1
+          fi
+          echo "No INTERNET permission in $manifest"
+      - name: Record artifact checksums
+        run: |
+          find apps/stickerjet/build/outputs -name '*.apk' -o -name '*.aab' | while read -r f; do
+            sha256sum "$f"
+          done | tee "$RUNNER_TEMP/stickerjet-checksums.txt"
+      - name: Upload debug APK and release AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: stickerjet-build-outputs
+          path: |
+            apps/stickerjet/build/outputs/apk/debug/*.apk
+            apps/stickerjet/build/outputs/bundle/release/*.aab
+          retention-days: 14
+      - name: Upload lint and unit test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stickerjet-quality-reports
+          path: |
+            apps/stickerjet/build/reports/
+          retention-days: 14
