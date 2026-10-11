@@ -1,10 +1,10 @@
 # Agency portfolio status
 
-Initialized October 10, 2026. Current status: G0 **plan and folder scaffold only**. No compiling source, staffed roles, builds, tests, signed releases or Play publications have been established by this commit.
+Initialized October 10, 2026. Current status: **StickerJet** has passed G1 on CI (commit `2fd5421`, workflow run 38152270493: core tests, Android unit tests, lint, debug APK, release AAB and manifest policy all green) and is partly through G2 on an emulator (see `apps/stickerjet/docs/release-checklist.md`). The other nine apps remain at G0 plan and scaffold only. No signed release, staffed role or Play publication exists.
 
 | App | Squad PM | G0 | G1 | G2 | G3 | G4 | G5 | G6 | G7 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| StickerJet | SJ-PM | planned | not started | not started | not started | not started | not started | not started | not started |
+| StickerJet | SJ-PM | done | done | partial (emulator) | not started | not started | not started | not started | not started |
 | TimeFlip | TF-PM | planned | not started | not started | not started | not started | not started | not started | not started |
 | PhotoDuel | PD-PM | planned | not started | not started | not started | not started | not started | not started | not started |
 | RetroWorld | RW-PM | planned | not started | not started | not started | not started | not started | not started | not started |
@@ -17,4 +17,4 @@ Initialized October 10, 2026. Current status: G0 **plan and folder scaffold only
 
 Rotating PM Council root steward: **not yet staffed**.
 
-Next: assign real handles to role seats, create issue tracker, implement root Gradle baseline and verify a compilable module per app.
+Next: assign real handles to role seats, create issue tracker, verify a compilable module per app for the remaining nine apps, and move StickerJet G2 to a real physical phone.

@@ -83,3 +83,17 @@ network are impossible without a future, reviewed change to this decision.
 
 **Decision.** Exports are shared with `ACTION_SEND` (`image/webp`). No messenger sticker-pack API is
 integrated in v0.1, so the app does not claim that any recipient imports the sticker as a pack.
+
+## ADR-009 — The journey export reaches CI through MediaStore, not the app's private directory
+
+**Context.** `connectedDebugAndroidTest` installs the app for the test and uninstalls it afterwards, so an
+export left in the app's files directory was unreachable to CI. The first attempt used `adb exec-out run-as`,
+which wrote the error text to stdout and exited 0. A verifier that treated "no export" as success then hid the gap.
+
+**Decision.** The instrumented journey publishes its export to `Download/journey-output/` through MediaStore,
+which survives uninstall. CI pulls it with `adb pull`, keeps it only when it starts with the RIFF header,
+and fails the verification step when the export is missing.
+
+**Consequences.** This path exists only in the test. Production code never writes to shared storage. The
+verifier is now a real gate, not a pass on absence.
+

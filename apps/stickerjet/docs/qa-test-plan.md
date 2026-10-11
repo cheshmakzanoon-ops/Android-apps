@@ -1,157 +1,81 @@
-# StickerJet QA test plan
+# StickerJet QA test plan and results
 
-Owner: SJ-D5 (OS, instrumentation, device QA). Status date: 2026-10-10.
+Owner: SJ-D5 (platform and QA), updated by SJ-PM. Status date: 2026-10-11, against commit `2fd5421`.
 
-## Rules for this plan
+## Rules
 
-- **PASS** only when a run produced the result and the evidence path below points to it.
-- **FAIL** when a run produced a failing result. The evidence is the run.
-- **NOT RUN** when nothing was executed. A written test that has not run is NOT RUN.
-- A device or emulator result is claimed only from a real run. No row here claims a device run that
-  did not happen.
-- The Android build cannot run in the QA container (Google Maven and the Android SDK are blocked).
-  Android build and lint evidence comes from GitHub Actions. Local evidence is limited to the pure
-  JVM core, the Python verifier, and static checks of text files.
+- **PASS** only when a run produced the result, and the evidence column names that run.
+- **FAIL** when a run produced a failing result.
+- **NOT RUN** when nothing was executed. Written code that has not run is NOT RUN.
+- A device or emulator result is claimed only from a real run. No row claims a device run that did not happen.
 
 ## 1. Environment matrix
 
-| Environment | How it runs | Status | Evidence |
+| Environment | Status | Evidence |
+|---|---|---|
+| Local container, pure JVM core | Reported by lanes, not re-run by PM | SJ-D2 and SJ-D4 each reported 159 test cases with 0 failures. Local Maven Central throttling makes this run intermittent |
+| GitHub `ubuntu-latest`, JDK 17, Gradle: core JVM tests | PASS | Run [38152270493](https://github.com/cheshmakzanoon-ops/Android-apps/actions/runs/38152270493), job *Core JVM tests* |
+| GitHub `ubuntu-latest`: Android unit tests, lint, debug APK, release AAB, manifest policy | PASS | Run 38152270493, job *Android unit tests, lint, debug APK and release AAB* |
+| GitHub `ubuntu-latest`: API 34 `google_apis` `x86_64` emulator with KVM | PASS | Run 38152270493, job *Instrumented journey on an API 34 emulator*. The 15-test count comes from run 38151440072 (commit `99d3e3f`), whose journey code is identical |
+| Emulator API 26 (minSdk) | NOT RUN | No job configured |
+| Emulator API 36 (targetSdk and compileSdk) | NOT RUN | No job configured |
+| Physical phone, Android 14 or newer, system Photo Picker | NOT RUN | No device available to this session |
+| Physical phone, Android 11 to 12, GetContent fallback | NOT RUN | No device available |
+| Physical phone, Android 8.0 (minSdk 26) | NOT RUN | No device available |
+| Physical phone without an H.264 decoder | NOT RUN | No device available |
+| Physical phone with low free storage | NOT RUN | No device available |
+
+## 2. Scenarios from the product QA list
+
+| # | Scenario | Status | Evidence and limit |
 |---|---|---|---|
-| QA container, JDK 17, Gradle 8.14.3 offline, pure JVM core | `./gradlew -Pstickerjet.skipAndroid=true :apps:stickerjet-core:test --offline` | PASS: 110 tests, 0 failures, 0 errors, 0 skipped | `apps/stickerjet/core/build/test-results/test/` (local build output, not durable) |
-| QA container, Python 3, Pillow 12.3.0 | `verify_animated_webp.py` self-test (section 6) | PASS: exit 0 on a valid animated WebP, exit 1 on a non-WebP file | Command output recorded in section 6 |
-| GitHub `ubuntu-latest`, job `android`: unit tests, lint, debug APK, release AAB | Workflow run 38071473415 | Build and lint reported green. The INTERNET check FAILED on that run. | Run 38071473415, reported by SJ-PM. SJ-D5 has not opened the logs. |
-| GitHub `ubuntu-latest`, job `instrumented`: API 34 `google_apis` `x86_64` emulator with KVM | Added in this change, `continue-on-error: true` | NOT RUN | No run yet. Blocked: see section 8. |
-| Emulator API 26 (minSdk) | none configured | NOT RUN | none |
-| Emulator API 36 (targetSdk, compileSdk) | none configured | NOT RUN | none |
-| Physical device: Android 14 or newer, system Photo Picker available | manual | NOT RUN | none |
-| Physical device: Android 11 to 12, no system Photo Picker (GetContent fallback path) | manual | NOT RUN | none |
-| Physical device: Android 8.0 (minSdk 26) | manual | NOT RUN | none |
-| Physical device: no H.264 decoder (expected `H264DecodeCapability.NotSupported`) | manual, device to be sourced | NOT RUN | none |
-| Physical device: low free storage (under 500 MB) | manual | NOT RUN | none |
+| 1 | Fresh install, no account | NOT RUN on a device | No cold-start test runs the installed app. The journey drives the real adapters without the UI |
+| 2 | Open without registration | PASS (emulator, fake ports) | Compose robot test starts the UI host with fake ports and no account. Not a cold start of the real app |
+| 3 | Import a supported video | PASS (emulator) | Journey imports a bundled synthetic clip through `ImportService` |
+| 4 | Trim | PASS (JVM) | `TrimPolicy` rules are unit tested. The journey uses the default trim; it does not drive a user trim |
+| 5 | Foreground segmentation on a supported sample | **NOT VALIDATED** | The only clip is synthetic with no person. The journey asserts the no-subject fallback path, not segmentation quality |
+| 6 | Correct or keep the mask | PASS (JVM) | `MaskRefiner` tests for RESTORE, ERASE, order and bounds. Not exercised on a device |
+| 7 | Preview a looping sticker | PASS (emulator, fake ports) | The import-to-share robot test reaches the preview with fake renderers. The real preview loop is not checked on a device |
+| 8 | Export a real animated file | PASS (emulator) | Journey exports through `StickerExporter` and `AnimatedWebpWriter` |
+| 9 | Decode and inspect the exported file independently | PASS (emulator) | Pillow 12.3.0 via `tools/verify_animated_webp.py`: valid structure, per-frame 512×512, durations 83 and 84 ms, ALPH and VP8 chunks, no problems reported |
+| 10 | Share through Android | PASS (emulator, partial) | The share intent is built with a FileProvider URI and resolves in the journey. No recipient app was driven |
+| 11 | Save and reopen a project | PASS (JVM, emulator data tests) | `FileProjectRepository` round trips and restart tests; instrumented data tests on the emulator |
+| 12 | Cancel an operation | PASS (JVM) | Export cancellation deletes its temporary file; covered by engine tests. Not on a device |
+| 13 | Unavailable permission | PASS (emulator, partial) | The app requests no permission. Revoked picker access is simulated with an exception in the data tests, not a real revocation |
+| 14 | Invalid input video | PASS (JVM, emulator) | `ImportPolicy` rejects non-video, too short, too long and too large; the journey covers a negative case |
+| 15 | Missing original file | NOT VERIFIED | The code maps a missing source to `SOURCE_MISSING`, but no test run shows it |
+| 16 | Low storage | PASS (CI unit tests) | `StorageGuard` tests with an injected free-space value. Not on a device |
+| 17 | Offline, core features | PASS (emulator, partial) | The app has no INTERNET permission, so it cannot use the network. Offline operation on a device is NOT RUN |
+| 18 | Low-memory and modern devices | NOT RUN | No device |
+| 19 | Unit and relevant integration tests | PASS | Core JVM tests and Android unit tests on run 38152270493 |
+| 20 | Debug APK and release AAB | PASS (build) | Built on run 38152270493. The AAB is unsigned: no upload key exists |
 
-## 2. Scenario matrix (product QA list)
+## 3. Security and policy checks
 
-Status applies to the scenario as written. A unit-level result alone does not make a scenario PASS.
-
-| # | Scenario | Automated coverage | Status | Evidence and notes |
-|---|---|---|---|---|
-| 1 | Fresh install | none | NOT RUN | Clean install of the debug APK on an API 34 emulator. Expect the launcher screen and no permission prompt. |
-| 2 | No account | none. No account code exists in the tree. | NOT RUN | Expect no sign-in screen and no account prompt on first run. |
-| 3 | Import (Photo Picker, copy, probe) | `StickerJourneyTest.importTrimExportAndShareOneStickerEndToEnd`, `unsupportedFileIsRejectedAndLeavesNoProjectFiles` | NOT RUN | Tests written, not run. The picker UI itself is manual. |
-| 4 | Trim (default 2.0 s window) | Journey asserts the default trim. Core `TrimPolicyTest`: 18 tests. | NOT RUN | Core rule tests PASS (section 1). Journey not run. |
-| 5 | Segmentation (person found, or fallback when no person) | Journey asserts alpha only when `subjectFrames > 0`. | NOT RUN | Needs a fixture with a visible person to exercise the mask path. |
-| 6 | Export (512 px, 12 fps, at most 500 KB) | Journey asserts frame count, durations, canvas, loop count and size. Core `ExportPlanTest`: 10 tests. | NOT RUN | Core rule tests PASS. Journey not run. |
-| 7 | Independent decode of the exported file | `tools/verify_animated_webp.py` in workflow job `instrumented` | NOT RUN | The tool works (section 6). It has not checked a file from the app. |
-| 8 | Share (FileProvider, grants, chooser) | Journey asserts the URI, grants, bytes served and chooser resolution. | NOT RUN | Recipient apps are not covered (section 7). |
-| 9 | Save and reopen | Journey reopens the project from disk in the same process. | NOT RUN | No cold-start test. |
-| 10 | Cancel during export (temp file removed) | none | NOT RUN | Manual: cancel at 50 percent, check that no partial file remains in `exports/`. |
-| 11 | Revoked permission (picked URI revoked before the copy) | Journey's missing-file test is a proxy only. It is not a true revocation. | NOT RUN | Manual: pick, revoke the grant, import. Expect `Failed(ACCESS_REVOKED)` and no project folder. |
-| 12 | Invalid input (not a video, unreadable) | Journey rejection test. Core `ImportPolicyTest`: 17 tests. | NOT RUN | Core rule tests PASS. Journey not run. |
-| 13 | Missing original (source deleted before export) | Journey `exportWithDeletedOriginalFailsAndKeepsTheDraft` | NOT RUN | Expect `SOURCE_MISSING`, the draft kept, no partial export. |
-| 14 | Low storage | none. `StorageGuard` has no test yet. | NOT RUN | Manual on a low-storage device. |
-| 15 | Offline use | none | NOT RUN | Source manifest has no INTERNET (section 5). Merged manifest FAILED on run 38071473415. Fix in tree, not yet verified. Airplane-mode run not done. |
-| 16 | Process death during import | `PendingImportHolder` has no test yet | NOT RUN | Manual: start import, `adb shell am kill`, relaunch, expect retry or ACCESS_REVOKED. |
-| 17 | Upgrade (0.1.0 to the next version) | none | NOT RUN | Needs two builds. Expect the library and the exports to survive. |
-| 18 | Unit tests and integration tests | Core JVM: 110 tests. Android unit tests: CI job `android`. Journey: CI job `instrumented`. | Core: PASS. Journey: NOT RUN. | Core evidence in section 1. Android unit tests: reported green in run 38071473415 (SJ-PM report). |
-| 19 | Debug APK | CI job `android`, `assembleDebug` | PASS (reported) | Run 38071473415, reported by SJ-PM. The APK has not been installed or run by SJ-D5. |
-| 20 | Release AAB | CI job `android`, `bundleRelease` | PASS for the unsigned bundle (reported). Signed upload NOT RUN. | Run 38071473415. CI has no keystore by design. Signed upload is a protected release step. |
-| 21 | Merged manifest: no INTERNET, no storage permission, backup off, private FileProvider | CI step "Verify the merged manifest policy" and the INTERNET step | FAIL on run 38071473415. Fix applied, not yet verified. | `tools:node="remove"` for INTERNET added. Re-run needed. |
-
-## 3. Automated tests added in this change
-
-| Test | Kind | Status | Notes |
-|---|---|---|---|
-| `StickerJourneyTest.importTrimExportAndShareOneStickerEndToEnd` | instrumented, real adapters | NOT RUN | Depends on engine adapters and a fixture not in the tree (section 8). |
-| `StickerJourneyTest.unsupportedFileIsRejectedAndLeavesNoProjectFiles` | instrumented, negative | NOT RUN | Accepts `NOT_A_VIDEO` or `UNREADABLE`. |
-| `StickerJourneyTest.missingSourceFailsCleanlyWithoutProjectFiles` | instrumented, negative | NOT RUN | Accepts `Failed(ACCESS_REVOKED or IO_ERROR)` or `Rejected(UNREADABLE)`. |
-| `StickerJourneyTest.exportWithDeletedOriginalFailsAndKeepsTheDraft` | instrumented, negative | NOT RUN | Expects `Failed(SOURCE_MISSING)`. |
-
-Each journey test is skipped (Assume), not passed, on a device without an H.264 decoder.
-
-## 4. Platform code status
-
-| Item | Status | Evidence |
+| Check | Status | How |
 |---|---|---|
-| `ExportSharing.shareIntent`, `clearShareCopies` | Written. Not run. | Journey covers it. Syntax-checked (section 6). |
-| `rememberVideoPicker` (Photo Picker, GetContent fallback) | Written. Not run. | Manual scenario 3. |
-| `PendingImportHolder` (commit-based, process-death safe) | Written. Not run. | Scenario 16. |
-| `H264Capability.probe()` | Written. Not run. | Used by the journey Assume. |
+| No INTERNET permission in the merged debug manifest | PASS | CI step in the Android job |
+| No storage or media permission in the merged manifest | PASS | CI step, which also rejects `READ_MEDIA_*` and `MANAGE_EXTERNAL_STORAGE` |
+| `allowBackup` is false | PASS | CI step |
+| FileProvider is `exported="false"` with `grantUriPermissions="true"` | PASS | CI step |
+| No keystore or secret committed | PASS | `.gitignore` covers keystores and service-account files; the release signing configuration reads environment variables only |
+| Logs contain no media | NOT VERIFIED | Code review only; no tooling check exists yet |
 
-Syntax check: the four platform files and the journey test were parsed with the Kotlin 2.2.21
-compiler from the Gradle cache. No parser errors remain. The only remaining errors are unresolved
-Android, AndroidX and engine symbols that are not on this machine. This is not a compile check. CI
-`assembleDebug` is the authority.
+## 4. Known gaps
 
-## 5. Security and policy checks
+- No physical device has run any test. Every device row is NOT RUN.
+- No real human footage is available in the repository. Segmentation quality is unmeasured.
+- The emulator journey uses synthetic media and checks the fallback path for segmentation.
+- The journey export reaches the decoder through MediaStore and `adb pull`, so the test is verified only as CI
+  publishes it. A user never sees that path; it exists only for the test.
+- The emulator job is required. A fresh emulator boot can be slow (about 5 to 7 minutes), so its timeout is 60 minutes.
 
-Run from the repository root. The source-level checks ran on 2026-10-10 and passed. The merged
-checks run in CI after a build.
+## 5. Reproducing the results
 
-| Check | Command | Result |
-|---|---|---|
-| Source manifest: INTERNET only as a removal marker | `grep -n 'android.permission' apps/stickerjet/src/main/AndroidManifest.xml` | PASS. Only line 14 matches, `INTERNET tools:node="remove"`. |
-| Source manifest: no storage permission | same grep | PASS. No `*_EXTERNAL_STORAGE` or `READ_MEDIA_*` entries. |
-| `android:allowBackup="false"` | `grep -n 'allowBackup="false"' apps/stickerjet/src/main/AndroidManifest.xml` | PASS. Line 18. |
-| FileProvider not exported, grants enabled | `grep -n -A3 'FileProvider' apps/stickerjet/src/main/AndroidManifest.xml` | PASS. `exported="false"`, `grantUriPermissions="true"`. |
-| Share path is the only exposed path | `cat apps/stickerjet/src/main/res/xml/file_paths.xml` | PASS. Only `cache-path name="share" path="share/"`. |
-| Merged manifest policy (INTERNET, storage, backup, provider) | CI step "Verify the merged manifest policy" in job `android` | FAIL on run 38071473415 (INTERNET). Not yet re-run. |
-| No keystore, password or key in the tree | `git ls-files --cached --others --exclude-standard \| grep -iE '\.(jks\|keystore\|p12\|pfx\|pem\|key)$\|keystore\|google-services\|secrets?\.\|\.env($\|\.)\|service-account' \|\| echo none` | PASS. `none`. |
-| No key material or literal passwords in sources | `grep -rIlE -- '-----BEGIN (RSA \|EC \|OPENSSH \|)PRIVATE KEY-----\|AKIA[0-9A-Z]{16}\|AIza[0-9A-Za-z_-]{35}' apps .github gradle build.gradle.kts settings.gradle.kts gradle.properties \|\| echo none` | PASS. `none`. |
-| Release signing comes only from the environment | `grep -n 'STICKERJET_UPLOAD' apps/stickerjet/build.gradle.kts` | PASS. Four environment reads, no literals. |
-
-Merged manifest, run locally after a build with the Android SDK (not available in the QA
-container):
-
+```bash
+./gradlew -Pstickerjet.skipAndroid=true :apps:stickerjet-core:test          # pure JVM core
+./gradlew :apps:stickerjet:testDebugUnitTest :apps:stickerjet:lintDebug \
+          :apps:stickerjet:assembleDebug :apps:stickerjet:bundleRelease     # Android build
+./gradlew :apps:stickerjet:connectedDebugAndroidTest                        # emulator or device
+python3 -I apps/stickerjet/tools/verify_animated_webp.py path/to/sticker.webp
 ```
-./gradlew :apps:stickerjet:assembleDebug
-apkanalyzer manifest print apps/stickerjet/build/outputs/apk/debug/stickerjet-debug.apk
-```
-
-Expect no `uses-permission` for INTERNET, `*_EXTERNAL_STORAGE`, `READ_MEDIA_*` or
-`MANAGE_EXTERNAL_STORAGE`. Expect `allowBackup="false"` and the FileProvider with
-`exported="false"`.
-
-## 6. Commands and results
-
-```
-# Pure JVM core unit tests (no Android SDK)
-./gradlew -Pstickerjet.skipAndroid=true :apps:stickerjet-core:test --offline
-# Result 2026-10-10: BUILD SUCCESSFUL, 110 tests, 0 failures.
-
-# Independent WebP verifier self-test
-python3 -I apps/stickerjet/tools/verify_animated_webp.py apps/stickerjet/core/src/test/resources/webp/pil_animated_3f.webp
-# Result 2026-10-10: exit 0, 3 frames, durations 100/200/300 ms, structure ok.
-python3 -I apps/stickerjet/tools/verify_animated_webp.py <any non-WebP file>
-# Result 2026-10-10: exit 1, UnidentifiedImageError.
-
-# Workflow static checks (actionlint 1.7.12 with shellcheck, from pip packages actionlint-py and shellcheck-py)
-actionlint -no-color .github/workflows/stickerjet.yml
-# Result 2026-10-10: exit 0.
-
-# Instrumented journey (needs a booted emulator or device with an H.264 decoder, and the fixture)
-./gradlew :apps:stickerjet:connectedDebugAndroidTest --console=plain
-# NOT RUN. Blocked: section 8.
-```
-
-## 7. What the journey test does not cover
-
-- Recipient apps and messengers: the chooser is resolved, but no receiver is driven. StickerJet
-  never claims that a messenger installs the sticker.
-- The Photo Picker UI. It is manual scenario 3.
-- A true revoked-permission path. Scenario 11 is manual.
-- Low storage, cancel, process death, offline use and upgrade. Those are manual scenarios 10, 14,
-  15, 16 and 17.
-- Matte quality and appearance. The test checks structure, timing and size.
-- Physical devices. Section 1 lists them as NOT RUN.
-
-## 8. Blockers and integration needs
-
-| Owner | Need | Blocks |
-|---|---|---|
-| SJ-D4 | Engine Android adapters in `apps/stickerjet/src/main/kotlin/com/agency/stickerjet/engine/`: `StickerExporter` (with `ExportOutcome`, `ExportFailure`), `MediaFrameSource`, `MlKitSubjectSegmenter`, `FrameEncoder`. They are not in the tree, so the journey does not compile. | Journey tests |
-| SJ-PM | Fixture `apps/stickerjet/assets/source/journey-clip.mp4`: H.264 MP4, 3 to 30 s, at most 150 MB, one clearly visible person. It is not in the tree. The build script already maps `assets/source` into androidTest assets. A placeholder with no person can be made with `ffmpeg -f lavfi -i testsrc2=size=640x360:rate=30 -t 4 -c:v libx264 -pix_fmt yuv420p journey-clip.mp4`. That placeholder exercises the fallback path, not segmentation. | Journey tests |
-| SJ-PM | `ExportSharing.clearShareCopies(context)` called from `StickerJetApplication.onCreate`. It is not called yet. | Share cleanup at launch |
-| SJ-PM | The committed `PhotoPicking.kt` (commit c24309c) still contains `"video/*"` inside a KDoc. Kotlin block comments nest, so that breaks the main compile. The working tree has the fix. The fix must be in the next commit. | Main compile |
-| SJ-PM | Re-run the `android` job with the merged-manifest fix. Confirm the INTERNET step is green. | Scenario 15, 21 |
-| SJ-D1 | Use `rememberVideoPicker`, and `PendingImportHolder` (save before `ImportService.import`, clear after any outcome, load on cold start). | Scenarios 3, 11, 16 |
-| SJ-D4 | Confirm that segmentation needs no network. The selfie model is bundled, so it should not. The journey run on the emulator is the check. | INTERNET removal |
