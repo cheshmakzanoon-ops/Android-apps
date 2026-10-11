@@ -1,7 +1,7 @@
 package com.agency.timeflip.ui.navigation
 
 import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.viewmodel.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.agency.timeflip.ui.UiDependencies

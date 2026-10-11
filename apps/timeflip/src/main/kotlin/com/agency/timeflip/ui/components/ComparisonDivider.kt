@@ -18,7 +18,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -65,7 +64,6 @@ fun ComparisonDivider(
                 .semantics {
                     contentDescription = label
                     stateDescription = "$percent%"
-                    role = Role.Slider
                 }
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(

@@ -8,6 +8,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -154,7 +155,7 @@ internal suspend fun PointerInputScope.detectAlignmentGestures(
                 previousAngle = angle
                 previousCount = pressed.size
                 event.changes.forEach { change ->
-                    if (change.positionChange() != Offset.Zero) change.consume()
+                    if (change.position != change.previousPosition) change.consume()
                 }
             }
         } while (event.changes.any { it.pressed })
