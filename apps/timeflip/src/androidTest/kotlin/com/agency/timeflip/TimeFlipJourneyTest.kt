@@ -3,7 +3,7 @@ package com.agency.timeflip
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.ui.test.ComposeTestRule
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText

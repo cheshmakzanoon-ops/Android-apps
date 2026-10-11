@@ -1,6 +1,6 @@
 package com.agency.timeflip.testsupport
 
-import androidx.compose.ui.test.ComposeTestRule
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.printToString
