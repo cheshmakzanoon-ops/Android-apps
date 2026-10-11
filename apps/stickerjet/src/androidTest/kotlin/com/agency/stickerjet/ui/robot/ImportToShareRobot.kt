@@ -2,11 +2,11 @@ package com.agency.stickerjet.ui.robot
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.test.platform.app.InstrumentationRegistry
 import com.agency.stickerjet.R
 import com.agency.stickerjet.ui.importing.ClipPicker
@@ -21,7 +21,7 @@ import java.io.File
  * is a fake from core testFixtures or a small double in this package.
  */
 class ImportToShareRobot(
-    private val rule: ComposeTestRule,
+    private val rule: ComposeContentTestRule,
     private val root: File,
 ) {
     private fun string(id: Int): String = InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
@@ -71,7 +71,7 @@ class ImportToShareRobot(
 
     fun assertExportedAndSaved(): ImportToShareRobot {
         rule.waitUntil(WAIT_MS) { nodeExists(string(R.string.preview_export_done_title)) }
-        rule.onNodeWithText(string(R.string.preview_saved)).assertExists()
+        rule.onNodeWithText(string(R.string.preview_saved)).assertIsDisplayed()
         return this
     }
 

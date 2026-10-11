@@ -4,7 +4,8 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertWidthIsAtLeast
-import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -25,6 +26,7 @@ import java.io.File
  * Spoken labels and touch targets. Icon-only controls must have a description, and every control must
  * be at least 48 dp square. Runs under connectedAndroidTest only.
  */
+@OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 class AccessibilityLabelsTest {
 
@@ -41,7 +43,7 @@ class AccessibilityLabelsTest {
             StickerJetTheme { StickerJetHost(ports = robotPorts(root(), onboardingCompleted = true)) }
         }
         rule.onNodeWithContentDescription(string(R.string.action_settings))
-            .assertExists()
+            .assertIsDisplayed()
             .assertWidthIsAtLeast(48.dp)
             .assertHeightIsAtLeast(48.dp)
     }
