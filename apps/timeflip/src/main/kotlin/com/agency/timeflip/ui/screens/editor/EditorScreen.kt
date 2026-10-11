@@ -72,6 +72,7 @@ import com.agency.timeflip.ui.common.frameIndexAt
 import com.agency.timeflip.ui.common.previewFrame
 import com.agency.timeflip.ui.common.progressAt
 import com.agency.timeflip.ui.common.rememberPhotoBitmap
+import com.agency.timeflip.ui.common.timeline
 import com.agency.timeflip.ui.components.BottomActionBar
 import com.agency.timeflip.ui.components.PrimaryButton
 import com.agency.timeflip.ui.components.SecondaryButton
@@ -253,6 +254,7 @@ private fun EditorBody(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
+            val previewDescription = stringResource(R.string.editor_preview_cd)
             Box(
                 modifier = Modifier
                     .aspectRatio(preview.aspectRatio.toFloat(), matchHeightConstraintsFirst = true)
@@ -266,7 +268,7 @@ private fun EditorBody(
                     transition = project.transition,
                     linearProgress = progress,
                     modifier = Modifier.semantics {
-                        contentDescription = "${stringResource(R.string.editor_preview_cd)}, frame ${frameIndex + 1}"
+                        contentDescription = "$previewDescription, frame ${frameIndex + 1}"
                     },
                 )
             }
