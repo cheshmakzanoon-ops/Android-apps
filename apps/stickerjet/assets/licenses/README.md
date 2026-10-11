@@ -54,3 +54,25 @@ Pillow's own report for each file, and the Kotlin tests use it as the reference.
 | `pil_animated_3f.webp` | `4854895130f5d6ecdfbd5d624e21ffe87e781da73780760a8085e7fadc654e8c` |
 | `pil_animated_lossless_2f.webp` | `2651917232224056f6c1f026067f9eeaf8893339e5abe837175775e0104494a5` |
 | `expected.json` | generated, not checksummed |
+
+## ML Kit selfie segmentation (third-party component)
+
+- **Library:** `com.google.mlkit:segmentation-selfie`, version `16.0.0-beta6`. The version is taken from
+  `gradle/libs.versions.toml` (key `mlkitSelfie`). It is a beta release.
+- **Provider and licence:** Google ML Kit. This is third-party code that this project does not own. Its
+  licence text is not reproduced here, and none has been paraphrased. The repository contains no ML Kit
+  source or model file.
+- **Cross-reference:** the public `googlesamples/mlkit` vision quickstart declares the same coordinate and
+  version in `android/vision-quickstart/app/build.gradle`. That confirms the coordinate and version only. The
+  sample's Apache-2.0 licence covers the sample code, not the library, and no code was copied from it.
+- **Bundled model (ADR-002 claim, NOT CONFIRMED here):** `docs/decisions.md` ADR-002 states that the model is
+  bundled, runs on device and needs no network. This environment cannot download the AAR (Google Maven
+  returns 403), so the bundling, the model file name and its size are not verified. Confirm them from the
+  AAR's contents before release.
+- **Upstream terms URL: NOT CONFIRMED.** developers.google.com is blocked from this environment, and the
+  sample README links to no terms document. The PM should add the ML Kit terms URL from the official page
+  once it can be read. No URL has been guessed.
+- **Licence wording: NOT REVIEWED BY COUNSEL.** `docs/design.md` already records that the ML Kit licence
+  wording in Settings needs legal review before Play submission. Until that review, treat any licence
+  statement in the app as a placeholder.
+- **Scope:** segmentation is person-focused. Pets and objects are not segmented (see ADR-002).
