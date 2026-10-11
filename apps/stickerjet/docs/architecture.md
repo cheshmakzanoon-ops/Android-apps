@@ -109,6 +109,15 @@ object StickerProjects {
     /** Trims whitespace, collapses runs of spaces, and falls back to FALLBACK_TITLE when empty. */
     fun normalizeTitle(raw: String): String
 }
+
+// Editing helpers, domain/StickerEdits.kt. Each returns a new project and sets updatedAtMs = nowMs.
+fun StickerProject.withTrim(trim: TrimRange, nowMs: Long): StickerProject             // clamps into the source (TrimPolicy.clamp)
+fun StickerProject.withTransform(transform: Transform, nowMs: Long): StickerProject   // throws on NaN or scale <= 0; quarterTurns mod 4
+fun StickerProject.withCaption(caption: Caption, nowMs: Long): StickerProject         // text via CaptionPolicy.normalize; argb in 32 bits
+fun StickerProject.withBackground(mode: BackgroundMode, nowMs: Long): StickerProject  // keeps strokes
+fun StickerProject.withStroke(stroke: MaskStroke, nowMs: Long): StickerProject        // appends; validated
+fun StickerProject.withoutStrokes(nowMs: Long): StickerProject                        // clears maskStrokes only
+fun StickerProject.withTitle(title: String, nowMs: Long): StickerProject              // via StickerProjects.normalizeTitle
 ```
 
 ### 3.2 `engine` pure (SJ-D4, package `com.agency.stickerjet.engine`, module `core`)

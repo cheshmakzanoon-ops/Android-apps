@@ -57,6 +57,13 @@ fun StickerProject.withStroke(stroke: MaskStroke, nowMs: Long): StickerProject {
     return copy(maskStrokes = maskStrokes + stroke, updatedAtMs = nowMs)
 }
 
+/**
+ * Removes every mask correction, so the mask falls back to the segmentation result alone. Only
+ * maskStrokes and updatedAtMs change. The background mode is kept.
+ */
+fun StickerProject.withoutStrokes(nowMs: Long): StickerProject =
+    copy(maskStrokes = emptyList(), updatedAtMs = nowMs)
+
 /** Renames the project. The title is normalized by [StickerProjects.normalizeTitle]. */
 fun StickerProject.withTitle(title: String, nowMs: Long): StickerProject =
     copy(title = StickerProjects.normalizeTitle(title), updatedAtMs = nowMs)

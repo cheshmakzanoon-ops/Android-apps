@@ -173,6 +173,36 @@ class StickerProjectsTest {
     }
 
     @Test
+    fun withoutStrokesClearsStrokesAndKeepsEveryOtherFieldAndTheTimestamp() {
+        val stroke = MaskStroke(StrokeMode.ERASE, listOf(NormalizedPoint(0.5f, 0.5f)), radius = 0.1f)
+        val exported = ExportRecord(
+            fileName = "stickerjet-clip-20261010-123456.webp",
+            createdAtMs = 5L,
+            sizeBytes = 1_000L,
+            frameCount = 24,
+            durationMs = 2_000L,
+        )
+        val original = project()
+            .withTitle("Kept title", nowMs = 2L)
+            .withTrim(TrimRange(1_000, 3_000), nowMs = 3L)
+            .withTransform(Transform(scale = 1.25f, offsetX = 0.1f, offsetY = -0.1f, quarterTurns = 1), nowMs = 4L)
+            .withCaption(Caption(text = "hi", position = CaptionPosition.TOP, argb = 0xFF00FF00L), nowMs = 5L)
+            .withBackground(BackgroundMode.REMOVE_BACKGROUND, nowMs = 6L)
+            .withStroke(stroke, nowMs = 7L)
+            .withStroke(stroke.copy(mode = StrokeMode.RESTORE), nowMs = 8L)
+            .copy(exports = listOf(exported))
+
+        val cleared = original.withoutStrokes(nowMs = 9L)
+
+        assertTrue(cleared.maskStrokes.isEmpty())
+        assertEquals(9L, cleared.updatedAtMs)
+        assertEquals(original.copy(maskStrokes = emptyList(), updatedAtMs = 9L), cleared)
+        // The original project is a value and must not change.
+        assertEquals(2, original.maskStrokes.size)
+        assertEquals(8L, original.updatedAtMs)
+    }
+
+    @Test
     fun withTitleNormalizesAndFallsBackWhenEmpty() {
         assertEquals("My sticker", project().withTitle("  My   sticker ", 2L).title)
         assertEquals("Sticker", project().withTitle("   ", 2L).title)
