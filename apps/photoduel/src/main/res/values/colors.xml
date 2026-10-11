@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PhotoDuel colour tokens. Names match the ANDROID code syntax of the Figma variables in
+  "Color Light" and "Color Dark" (file u4JSaycaKPivgX6Lr8rgr3). Palette: warm paper neutral, dark ink,
+  one cobalt accent. No gradients. Compose reads these through ui/theme; keep both in step.
+-->
+<resources>
+    <!-- Light -->
+    <color name="pd_bg_canvas_light">#F6F1E7</color>
+    <color name="pd_bg_surface_light">#FBF8F2</color>
+    <color name="pd_bg_sunken_light">#EDE6D6</color>
+    <color name="pd_bg_inverse_light">#1B1A17</color>
+    <color name="pd_text_primary_light">#1B1A17</color>
+    <color name="pd_text_secondary_light">#5B564B</color>
+    <color name="pd_text_inverse_light">#F6F1E7</color>
+    <color name="pd_text_on_accent_light">#FFFFFF</color>
+    <color name="pd_text_on_photo_light">#FFFFFF</color>
+    <color name="pd_accent_light">#2540C8</color>
+    <color name="pd_accent_container_light">#DCE3FF</color>
+    <color name="pd_on_accent_container_light">#0B1450</color>
+    <color name="pd_border_light">#DCD3BF</color>
+    <color name="pd_border_strong_light">#8A8270</color>
+    <color name="pd_error_light">#B3261E</color>
+    <color name="pd_error_container_light">#F9DEDC</color>
+    <color name="pd_on_error_container_light">#410E0B</color>
+    <color name="pd_success_light">#2E6B3A</color>
+    <color name="pd_success_container_light">#D9EBDC</color>
+    <color name="pd_scrim_light">#9915140F</color>
+    <color name="pd_caption_overlay_light">#B815140F</color>
+
+    <!-- Dark -->
+    <color name="pd_bg_canvas_dark">#15140F</color>
+    <color name="pd_bg_surface_dark">#1F1D18</color>
+    <color name="pd_bg_sunken_dark">#2A2822</color>
+    <color name="pd_bg_inverse_dark">#F6F1E7</color>
+    <color name="pd_text_primary_dark">#F6F1E7</color>
+    <color name="pd_text_secondary_dark">#C9C1AE</color>
+    <color name="pd_text_inverse_dark">#1B1A17</color>
+    <color name="pd_text_on_accent_dark">#0B1450</color>
+    <color name="pd_text_on_photo_dark">#FFFFFF</color>
+    <color name="pd_accent_dark">#9DB0FF</color>
+    <color name="pd_accent_container_dark">#1E2A6E</color>
+    <color name="pd_on_accent_container_dark">#DCE3FF</color>
+    <color name="pd_border_dark">#3A372F</color>
+    <color name="pd_border_strong_dark">#6B6657</color>
+    <color name="pd_error_dark">#F2B8B5</color>
+    <color name="pd_error_container_dark">#410E0B</color>
+    <color name="pd_on_error_container_dark">#F9DEDC</color>
+    <color name="pd_success_dark">#8FCB9B</color>
+    <color name="pd_success_container_dark">#12301A</color>
+    <color name="pd_scrim_dark">#9915140F</color>
+    <color name="pd_caption_overlay_dark">#B815140F</color>
+</resources>

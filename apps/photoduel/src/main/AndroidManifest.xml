@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PhotoDuel manifest. Owned by PD-D5. The privacy surface is deliberately small and checked in CI
+  (see .github/workflows/photoduel.yml, step "Merged manifest policy check").
+
+  Permissions declared by this app, and nothing else:
+    INTERNET               reach the PhotoDuel API
+    ACCESS_NETWORK_STATE   offline banner (NetworkMonitor)
+    POST_NOTIFICATIONS     Android 13+, asked ONLY when the user switches on reminders, never at launch.
+                           This build schedules no reminders (see NotificationPermissionController).
+
+  The window theme (@style/Theme.PhotoDuel) is defined by the UI lane in res/values/themes.xml.
+
+  Not declared, on purpose: any storage or READ_MEDIA_* permission (the system Photo Picker needs none),
+  ACCESS_MEDIA_LOCATION or any location permission, CAMERA (photos are taken by the system camera app
+  through ACTION_IMAGE_CAPTURE, so this app never opens the camera), contacts, microphone.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Package visibility (API 30+): lets the picker check that a camera app exists. -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".app.PhotoDuelApplication"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="PhotoDuel"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PhotoDuel">
+
+        <!--
+          The only exported component. singleTop: a photoduel://invite/{token} link opened while the app
+          is in front is delivered to onNewIntent instead of stacking a second activity.
+          No android:autoVerify and no https host: App Links are not claimed in this build.
+        -->
+        <activity
+            android:name=".app.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="invite"
+                    android:scheme="photoduel" />
+            </intent-filter>
+        </activity>
+
+        <!-- Camera photos are written here for the system camera app. Not exported; access is granted per URI. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+</manifest>

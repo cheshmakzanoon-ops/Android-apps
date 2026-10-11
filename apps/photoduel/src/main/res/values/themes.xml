@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Window theme for the Compose host activity. The window background is the light paper colour so
+      cold start never flashes white; the Compose theme repaints with the dark palette when the system
+      is in dark mode. A values-night override would remove the one-frame light flash in dark mode.
+    -->
+    <style name="Theme.PhotoDuel" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/pd_bg_canvas_light</item>
+        <item name="android:colorBackground">@color/pd_bg_canvas_light</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:textColorPrimary">@color/pd_text_primary_light</item>
+    </style>
+</resources>

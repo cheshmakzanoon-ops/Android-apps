@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spacing, radius and elevation tokens. Names match the ANDROID code syntax of the Figma variables. -->
+<resources>
+    <dimen name="pd_space_2xs">4dp</dimen>
+    <dimen name="pd_space_xs">8dp</dimen>
+    <dimen name="pd_space_sm">12dp</dimen>
+    <dimen name="pd_space_md">16dp</dimen>
+    <dimen name="pd_space_lg">24dp</dimen>
+    <dimen name="pd_space_xl">32dp</dimen>
+    <dimen name="pd_space_2xl">48dp</dimen>
+    <dimen name="pd_touch_target">48dp</dimen>
+    <dimen name="pd_gutter">16dp</dimen>
+
+    <dimen name="pd_radius_sm">8dp</dimen>
+    <dimen name="pd_radius_md">12dp</dimen>
+    <dimen name="pd_radius_lg">20dp</dimen>
+    <dimen name="pd_radius_xl">28dp</dimen>
+
+    <dimen name="pd_elevation_0">0dp</dimen>
+    <dimen name="pd_elevation_1">1dp</dimen>
+    <dimen name="pd_elevation_2">3dp</dimen>
+    <dimen name="pd_elevation_3">6dp</dimen>
+
+    <!-- Photo grid: two columns on phones; cards never get narrower than this. -->
+    <dimen name="pd_photo_card_min_width">148dp</dimen>
+    <dimen name="pd_content_max_width">640dp</dimen>
+</resources>

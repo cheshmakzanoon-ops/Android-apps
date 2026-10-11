@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PhotoDuel launcher icon, foreground layer: two photo cards tilted toward each other (the duel).
+  Original artwork drawn for this app from plain shapes. The content stays inside the 66dp safe zone.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Back card, tilted left. -->
+    <group
+        android:pivotX="41"
+        android:pivotY="54"
+        android:rotation="-10">
+        <path
+            android:fillColor="#DCE3FF"
+            android:pathData="M31,35 H51 Q55,35 55,39 V69 Q55,73 51,73 H31 Q27,73 27,69 V39 Q27,35 31,35 Z" />
+        <path
+            android:fillColor="#2540C8"
+            android:pathData="M30,38 H52 V60 H30 Z" />
+        <path
+            android:fillColor="#DCE3FF"
+            android:pathData="M30,60 L37,50 L42,56 L47,51 L52,60 Z" />
+        <path
+            android:fillColor="#DCE3FF"
+            android:pathData="M33,42.5 a2.5,2.5 0 1,0 5,0 a2.5,2.5 0 1,0 -5,0 Z" />
+    </group>
+
+    <!-- Front card, tilted right. The stroke in the background colour cuts a clean gap against the back card. -->
+    <group
+        android:pivotX="67"
+        android:pivotY="54"
+        android:rotation="8">
+        <path
+            android:fillColor="#F6F1E7"
+            android:pathData="M57,35 H77 Q81,35 81,39 V69 Q81,73 77,73 H57 Q53,73 53,69 V39 Q53,35 57,35 Z"
+            android:strokeColor="#2540C8"
+            android:strokeWidth="1.6" />
+        <path
+            android:fillColor="#2540C8"
+            android:pathData="M56,38 H78 V60 H56 Z" />
+        <path
+            android:fillColor="#F6F1E7"
+            android:pathData="M56,60 L63,49 L68,55 L72,50 L78,60 Z" />
+        <path
+            android:fillColor="#F6F1E7"
+            android:pathData="M69.5,43 a2.5,2.5 0 1,0 5,0 a2.5,2.5 0 1,0 -5,0 Z" />
+        <path
+            android:fillColor="#C9C1AE"
+            android:pathData="M56,64 H78 V66 H56 Z M56,68 H70 V70 H56 Z" />
+    </group>
+</vector>

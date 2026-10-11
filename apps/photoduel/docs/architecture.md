@@ -143,7 +143,7 @@ Rules:
 - Submissions are considered at voting close, not earlier. A photo that is removed or hidden before close does not appear in `P`, and ballots for it are void.
 - Result output includes per-submission counts, `ballotCount`, `eligibleVoterCount`, outcome and co-winner list. Voter identities are never published (secret ballot).
 
-Golden vectors for these rules live in `contracts/vectors/results.v1.json` (ten cases, including tie, void self-vote, void blocked pair, removed-target ballot, first-ballot-only, and insufficient outcomes). Both the Kotlin `ResultCalculator` and the Node `tally` function must pass every vector.
+Golden vectors for these rules live in `contracts/vectors/results.v1.json` (nine cases, including tie, void self-vote, void blocked pair, removed-target ballot, first-ballot-only, and insufficient outcomes). Both the Kotlin `ResultCalculator` and the Node `tally` function must pass every vector.
 
 ## 9. Media pipeline and privacy
 

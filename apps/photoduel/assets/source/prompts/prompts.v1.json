@@ -1,0 +1,155 @@
+{
+  "catalogVersion": "1.0.0",
+  "prompts": [
+    {
+      "id": "p-001",
+      "title": "Long Shadow",
+      "brief": "Find a shadow that is longer or stranger than the thing casting it, and make the shadow the subject of the frame."
+    },
+    {
+      "id": "p-002",
+      "title": "Window Light",
+      "brief": "Let one window decide the lighting. Show how its light lands on a wall, a floor or an object nearby."
+    },
+    {
+      "id": "p-003",
+      "title": "Clean Silhouette",
+      "brief": "Shoot toward the light so an object becomes a flat dark shape. Keep its outline simple enough to recognise at a glance."
+    },
+    {
+      "id": "p-004",
+      "title": "Converging Lines",
+      "brief": "Frame straight lines that meet, repeat or cross. Stand square to the scene and keep the verticals upright."
+    },
+    {
+      "id": "p-005",
+      "title": "Circle Hunt",
+      "brief": "Find a circle nobody meant you to admire, like a drain, a lid or a ring of rust, and let it fill the frame."
+    },
+    {
+      "id": "p-006",
+      "title": "Stair Rhythm",
+      "brief": "Use steps, ramps or railings to build a beat of repeated shapes that pulls the eye through the picture."
+    },
+    {
+      "id": "p-007",
+      "title": "Rough Meets Smooth",
+      "brief": "Put a rough surface beside a smooth one in the same frame so the contrast can almost be felt through the screen."
+    },
+    {
+      "id": "p-008",
+      "title": "Wearing Away",
+      "brief": "Get close to a surface that is slowly giving way: flaking paint, cracked mud, polished stone. Show its grain."
+    },
+    {
+      "id": "p-009",
+      "title": "Soft to the Eye",
+      "brief": "Find something that looks soft to the touch, such as wool, moss, rising dough or folded linen, and make us want to feel it."
+    },
+    {
+      "id": "p-010",
+      "title": "Puddle World",
+      "brief": "Use a puddle, wet pavement or still pond to show a second scene, upside down, beneath the first."
+    },
+    {
+      "id": "p-011",
+      "title": "Curved Mirror",
+      "brief": "Capture a scene bent by a spoon, a kettle, a bowl or a glass sphere. The bend should be what we notice first."
+    },
+    {
+      "id": "p-012",
+      "title": "Glass Layers",
+      "brief": "Let a window show what is outside and what is reflected at the same time, and make the two layers work together."
+    },
+    {
+      "id": "p-013",
+      "title": "Tiny Giant",
+      "brief": "Make something very small look enormous, or something huge look small, using only your angle and your distance."
+    },
+    {
+      "id": "p-014",
+      "title": "Small in Big Space",
+      "brief": "Place one tiny subject in a wide empty setting so that the space around it tells the story."
+    },
+    {
+      "id": "p-015",
+      "title": "Close Enough to Count",
+      "brief": "Move in until you can count the parts: petals, bricks, stitches, grains of sand. Keep the nearest detail sharp."
+    },
+    {
+      "id": "p-016",
+      "title": "Nobody Home",
+      "brief": "Show a place that looks as if people just left: a pulled-out chair, a lit lamp, a half-finished puzzle. No people in frame."
+    },
+    {
+      "id": "p-017",
+      "title": "Quiet Place",
+      "brief": "Photograph a street, hall or stairwell at a moment when nobody is there, and let the emptiness set the mood."
+    },
+    {
+      "id": "p-018",
+      "title": "Traces Left Behind",
+      "brief": "Show the evidence that someone passed by, like footprints, a cup ring or a worn path, without showing anyone."
+    },
+    {
+      "id": "p-019",
+      "title": "Waiting Objects",
+      "brief": "Photograph an object that seems to be waiting for its owner: a bike against a wall, a coat on a hook, shoes by a door."
+    },
+    {
+      "id": "p-020",
+      "title": "One Colour Only",
+      "brief": "Fill the frame with a single colour in several shades. Look for it in walls, fabric, food or leaves."
+    },
+    {
+      "id": "p-021",
+      "title": "Colour Clash",
+      "brief": "Find two colours that should not work together, then frame them so that they somehow do."
+    },
+    {
+      "id": "p-022",
+      "title": "One Bright Spot",
+      "brief": "Keep the scene calm and muted, and let one small spot of bright colour take all of the attention."
+    },
+    {
+      "id": "p-023",
+      "title": "Blur on Purpose",
+      "brief": "Turn movement into streaks with a slow shutter or a steady pan, while one part of the scene stays sharp."
+    },
+    {
+      "id": "p-024",
+      "title": "Frozen Moment",
+      "brief": "Freeze something that is normally too quick to see: poured water, drifting flour, a splash, a spinning top."
+    },
+    {
+      "id": "p-025",
+      "title": "Wind at Work",
+      "brief": "Show the wind without showing the wind: bending grass, a snapping flag, tumbling leaves or a billowing curtain."
+    },
+    {
+      "id": "p-026",
+      "title": "New Angle on the Old",
+      "brief": "Take one familiar object and photograph it from an angle nobody uses, until it looks like a landscape or a creature."
+    },
+    {
+      "id": "p-027",
+      "title": "Accidental Face",
+      "brief": "Find a face in something that is not a face: a socket, a tap, a pair of windows. Frame it so the expression is clear."
+    },
+    {
+      "id": "p-028",
+      "title": "Laid Out Neatly",
+      "brief": "Arrange ordinary things like keys, buttons or pegs into a tidy pattern and photograph it straight from above."
+    },
+    {
+      "id": "p-029",
+      "title": "Tool Portrait",
+      "brief": "Treat a well-used tool or utensil like a portrait subject: soft light, a plain background, and its history showing."
+    },
+    {
+      "id": "p-030",
+      "title": "Overlooked",
+      "brief": "Photograph something you pass every day without noticing, and show it so that others see it properly for the first time."
+    }
+  ]
+}

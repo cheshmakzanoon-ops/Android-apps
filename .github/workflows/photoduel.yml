@@ -1,0 +1,606 @@
+# PhotoDuel CI. Owned by PD-D5. This is the only workflow file the PhotoDuel squad edits.
+#
+# Jobs
+#   core-jvm      pure JVM unit tests of the domain, data client and engine math (no Android SDK needed)
+#   backend       Node 22 + PostgreSQL 16: build, unit and security tests, end-to-end tests
+#   android       unit tests, lint, debug APK and an UNSIGNED release AAB, with a merged-manifest policy
+#                 check, SHA-256 checksums and a 14-day artifact upload
+#   instrumented  API 34 emulator, runs connectedDebugAndroidTest (including the multi-account journey
+#                 test) against a real backend. NON-BLOCKING (continue-on-error) until green evidence
+#                 exists: the first release has no green emulator run yet, so a red result here must not
+#                 hide the other jobs. Remove continue-on-error only after a run is green, and record that
+#                 run in docs/qa-test-plan.md.
+#
+# No secrets are used or needed. There is no keystore and no signing variable anywhere: the release
+# bundle is built unsigned on purpose (signing happens only in a protected environment, outside this
+# repository). The PostgreSQL password below belongs to a throwaway service container that exists only
+# for the duration of a job and is not reachable from outside the runner.
+
+name: PhotoDuel CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+    paths:
+      - 'apps/photoduel/**'
+      - 'gradle/**'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/photoduel.yml'
+  pull_request:
+    paths:
+      - 'apps/photoduel/**'
+      - 'gradle/**'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/photoduel.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: photoduel-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  core-jvm:
+    name: Core (pure JVM tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run core tests without the Android module
+        run: |
+          chmod +x ./gradlew
+          ./gradlew -Pphotoduel.skipAndroid=true :apps:photoduel-core:test --console=plain --stacktrace
+
+      - name: Upload core test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: photoduel-core-test-reports
+          path: |
+            apps/photoduel/core/build/reports/tests/test
+            apps/photoduel/core/build/test-results/test
+          if-no-files-found: warn
+          retention-days: 14
+
+  backend:
+    name: Backend (Node 22, PostgreSQL 16)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: photoduel
+          POSTGRES_PASSWORD: photoduel-ci-only
+          POSTGRES_DB: photoduel_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U photoduel -d photoduel_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgres://photoduel:photoduel-ci-only@localhost:5432/photoduel_test
+    defaults:
+      run:
+        working-directory: apps/photoduel/backend
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/photoduel/backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit and security tests
+        run: npm test
+
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+  android:
+    name: Android (unit tests, lint, debug APK, UNSIGNED release AAB)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests, lint, debug APK, unsigned release AAB
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:photoduel:testDebugUnitTest :apps:photoduel:lintDebug :apps:photoduel:assembleDebug :apps:photoduel:bundleRelease --console=plain --stacktrace
+
+      - name: Merged manifest policy check
+        run: |
+          mkdir -p ci-evidence
+          python3 - <<'PY' 2>&1 | tee ci-evidence/manifest-policy.txt
+          import glob
+          import sys
+          import xml.etree.ElementTree as ET
+
+          ANDROID = '{http://schemas.android.com/apk/res/android}'
+          PKG = 'com.agency.photoduel'
+          INTERMEDIATES = 'apps/photoduel/build/intermediates'
+          SRC = 'apps/photoduel/src'
+          SESSION_FILE = 'datastore/photoduel_session.preferences_pb'
+
+          ALLOWED_PERMISSIONS = {
+              'android.permission.INTERNET',
+              'android.permission.ACCESS_NETWORK_STATE',
+              'android.permission.POST_NOTIFICATIONS',
+              # Added by AndroidX Core to every app; it only guards this app's own dynamic receivers.
+              PKG + '.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION',
+          }
+          # Components that may be exported in the RELEASE manifest. Anything else exported fails the build.
+          ALLOWED_EXPORTED_RELEASE = {
+              PKG + '.app.MainActivity': False,                    # launcher and photoduel://invite
+              'androidx.profileinstaller.ProfileInstallReceiver': True,  # must be protected by a permission
+          }
+
+          failures = []
+
+
+          def fail(message):
+              failures.append(message)
+              print('FAIL: ' + message)
+
+
+          def ok(message):
+              print('ok:   ' + message)
+
+
+          def attr(element, name):
+              return element.get(ANDROID + name)
+
+
+          def find_manifest(variant):
+              patterns = [
+                  INTERMEDIATES + '/merged_manifests/' + variant + '/**/AndroidManifest.xml',
+                  INTERMEDIATES + '/merged_manifest/' + variant + '/**/AndroidManifest.xml',
+                  INTERMEDIATES + '/packaged_manifests/' + variant + '/**/AndroidManifest.xml',
+              ]
+              for pattern in patterns:
+                  hits = sorted(glob.glob(pattern, recursive=True))
+                  if hits:
+                      return hits[0]
+              return None
+
+
+          def is_exported(element):
+              value = attr(element, 'exported')
+              if value is not None:
+                  return value == 'true'
+              return element.find('intent-filter') is not None
+
+
+          def check_manifest(variant):
+              path = find_manifest(variant)
+              if path is None:
+                  found = sorted(glob.glob(INTERMEDIATES + '/**/AndroidManifest.xml', recursive=True))
+                  fail('no merged manifest found for ' + variant + '. Manifests present: ' + ', '.join(found[:40]))
+                  return
+              print('--- ' + variant + ' manifest: ' + path)
+              root = ET.parse(path).getroot()
+              application = root.find('application')
+              if application is None:
+                  fail(variant + ': no <application> element')
+                  return
+
+              # Permissions: exactly the allowed set, and INTERNET must be present.
+              declared = sorted({
+                  element.get(ANDROID + 'name')
+                  for element in root.iter()
+                  if element.tag in ('uses-permission', 'uses-permission-sdk-23')
+              })
+              print('permissions: ' + ', '.join(declared))
+              if 'android.permission.INTERNET' not in declared:
+                  fail(variant + ': INTERNET permission is missing (the app could not reach its server)')
+              for name in declared:
+                  if name in ALLOWED_PERMISSIONS:
+                      continue
+                  lowered = name.lower()
+                  if 'storage' in lowered or 'media' in lowered:
+                      fail(variant + ': storage or media permission declared: ' + name)
+                  elif 'location' in lowered:
+                      fail(variant + ': location permission declared: ' + name)
+                  else:
+                      fail(variant + ': permission outside the allowlist: ' + name)
+              for element in root.findall('permission'):
+                  name = element.get(ANDROID + 'name')
+                  if name != PKG + '.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION':
+                      fail(variant + ': custom permission defined: ' + str(name))
+
+              # Application flags.
+              if attr(application, 'allowBackup') != 'false':
+                  fail(variant + ': android:allowBackup is not "false"')
+              else:
+                  ok(variant + ': allowBackup=false')
+              if attr(application, 'usesCleartextTraffic') == 'true':
+                  fail(variant + ': usesCleartextTraffic is true')
+              if attr(application, 'networkSecurityConfig') != '@xml/network_security_config':
+                  fail(variant + ': networkSecurityConfig is not set to @xml/network_security_config')
+              if variant == 'release' and attr(application, 'debuggable') == 'true':
+                  fail('release: the application is debuggable')
+              if not attr(application, 'dataExtractionRules'):
+                  fail(variant + ': dataExtractionRules is not set')
+
+              # Providers: the FileProvider must be private, and no provider may be exported.
+              provider_ok = False
+              for provider in application.findall('provider'):
+                  name = attr(provider, 'name')
+                  if attr(provider, 'exported') == 'true':
+                      fail(variant + ': exported provider ' + str(name))
+                  if name == 'androidx.core.content.FileProvider':
+                      provider_ok = (
+                          attr(provider, 'exported') == 'false'
+                          and attr(provider, 'grantUriPermissions') == 'true'
+                          and attr(provider, 'authorities') == PKG + '.fileprovider'
+                      )
+              if provider_ok:
+                  ok(variant + ': FileProvider exported=false, grantUriPermissions=true')
+              else:
+                  fail(variant + ': FileProvider is missing or not (exported=false, grantUriPermissions=true, authority ' + PKG + '.fileprovider)')
+
+              # Exported components.
+              exported = []
+              for tag in ('activity', 'activity-alias', 'service', 'receiver', 'provider'):
+                  for element in application.findall(tag):
+                      if is_exported(element):
+                          exported.append((attr(element, 'name'), attr(element, 'permission')))
+              print('exported components: ' + ', '.join(str(n) + (' [permission ' + str(p) + ']' if p else '') for n, p in exported))
+              if variant == 'release':
+                  for name, permission in exported:
+                      if name not in ALLOWED_EXPORTED_RELEASE:
+                          fail('release: unexpected exported component ' + str(name))
+                      elif ALLOWED_EXPORTED_RELEASE[name] and not permission:
+                          fail('release: exported component ' + str(name) + ' is not protected by a permission')
+
+              # Deep link: photoduel://invite only, singleTop, never verified, never https.
+              main = None
+              for activity in application.findall('activity'):
+                  if attr(activity, 'name') == PKG + '.app.MainActivity':
+                      main = activity
+              if main is None:
+                  fail(variant + ': MainActivity not found')
+              else:
+                  if attr(main, 'launchMode') != 'singleTop':
+                      fail(variant + ': MainActivity is not launchMode=singleTop')
+                  view_targets = []
+                  launcher = False
+                  for intent_filter in main.findall('intent-filter'):
+                      actions = {attr(a, 'name') for a in intent_filter.findall('action')}
+                      categories = {attr(c, 'name') for c in intent_filter.findall('category')}
+                      if 'android.intent.action.MAIN' in actions and 'android.intent.category.LAUNCHER' in categories:
+                          launcher = True
+                      if 'android.intent.action.VIEW' in actions:
+                          for data in intent_filter.findall('data'):
+                              view_targets.append((attr(data, 'scheme'), attr(data, 'host')))
+                  if not launcher:
+                      fail(variant + ': MainActivity has no launcher intent filter')
+                  if sorted(view_targets) != [('photoduel', 'invite')]:
+                      fail(variant + ': VIEW intent filters must be exactly photoduel://invite, found ' + str(view_targets))
+                  else:
+                      ok(variant + ': deep link is photoduel://invite only')
+              for element in root.iter():
+                  if attr(element, 'autoVerify') is not None:
+                      fail(variant + ': android:autoVerify present on <' + element.tag + '> (App Links are not claimed)')
+                  if element.tag == 'data' and (attr(element, 'scheme') or '').lower() in ('http', 'https'):
+                      fail(variant + ': an intent filter accepts ' + attr(element, 'scheme') + ' links')
+
+
+          def check_sources():
+              print('--- source resources')
+              main_config = ET.parse(SRC + '/main/res/xml/network_security_config.xml').getroot()
+              if any(e.get('cleartextTrafficPermitted') == 'true' for e in main_config.iter()):
+                  fail('main network_security_config permits cleartext traffic')
+              else:
+                  ok('main network_security_config requires HTTPS everywhere')
+
+              debug_config = ET.parse(SRC + '/debug/res/xml/network_security_config.xml').getroot()
+              base = debug_config.find('base-config')
+              if base is None or base.get('cleartextTrafficPermitted') == 'true':
+                  fail('debug network_security_config base-config must forbid cleartext')
+              for domain_config in debug_config.findall('domain-config'):
+                  if domain_config.get('cleartextTrafficPermitted') != 'true':
+                      continue
+                  hosts = {(d.text or '').strip() for d in domain_config.findall('domain')}
+                  if not hosts <= {'10.0.2.2', 'localhost'}:
+                      fail('debug cleartext is allowed for hosts other than 10.0.2.2 and localhost: ' + ', '.join(sorted(hosts)))
+                  else:
+                      ok('debug cleartext limited to ' + ', '.join(sorted(hosts)))
+
+              rules = ET.parse(SRC + '/main/res/xml/data_extraction_rules.xml').getroot()
+              for section in ('cloud-backup', 'device-transfer'):
+                  node = rules.find(section)
+                  excluded = [] if node is None else [(e.get('domain'), e.get('path')) for e in node.findall('exclude')]
+                  if ('file', SESSION_FILE) not in excluded:
+                      fail('data_extraction_rules <' + section + '> does not exclude ' + SESSION_FILE)
+                  else:
+                      ok('data_extraction_rules <' + section + '> excludes the session file')
+              backup = ET.parse(SRC + '/main/res/xml/backup_rules.xml').getroot()
+              if ('file', SESSION_FILE) not in [(e.get('domain'), e.get('path')) for e in backup.findall('exclude')]:
+                  fail('backup_rules does not exclude ' + SESSION_FILE)
+
+              paths = ET.parse(SRC + '/main/res/xml/file_paths.xml').getroot()
+              shared = [(e.tag, e.get('name'), e.get('path')) for e in paths]
+              if shared != [('cache-path', 'camera', 'camera/')]:
+                  fail('file_paths.xml must share only cache-path camera/, found ' + str(shared))
+              else:
+                  ok('FileProvider shares only cacheDir/camera')
+
+
+          check_manifest('release')
+          check_manifest('debug')
+          check_sources()
+          print('')
+          if failures:
+              print(str(len(failures)) + ' policy failure(s)')
+              sys.exit(1)
+          print('manifest policy: all checks passed')
+          PY
+
+      - name: Verify the release AAB is unsigned
+        run: |
+          python3 - <<'PY' 2>&1 | tee -a ci-evidence/manifest-policy.txt
+          import glob
+          import sys
+          import zipfile
+
+          bundles = sorted(glob.glob('apps/photoduel/build/outputs/bundle/release/*.aab'))
+          if not bundles:
+              print('FAIL: no release AAB was produced')
+              sys.exit(1)
+          bad = False
+          for bundle in bundles:
+              with zipfile.ZipFile(bundle) as archive:
+                  signatures = [
+                      n for n in archive.namelist()
+                      if n.upper().startswith('META-INF/') and n.upper().endswith(('.RSA', '.DSA', '.EC', '.SF'))
+                  ]
+              if signatures:
+                  print('FAIL: ' + bundle + ' carries signature files: ' + ', '.join(signatures))
+                  bad = True
+              else:
+                  print('ok:   ' + bundle + ' is UNSIGNED (no META-INF signature files)')
+          sys.exit(1 if bad else 0)
+          PY
+
+      - name: SHA-256 checksums of every APK and AAB
+        run: |
+          set -euo pipefail
+          mkdir -p ci-evidence
+          find apps/photoduel/build/outputs \( -name '*.apk' -o -name '*.aab' \) -type f | sort > ci-evidence/artifacts.list
+          test -s ci-evidence/artifacts.list
+          xargs -a ci-evidence/artifacts.list sha256sum | tee ci-evidence/SHA256SUMS.txt
+          echo "commit ${GITHUB_SHA}" > ci-evidence/commit.txt
+          echo "run ${GITHUB_RUN_ID} attempt ${GITHUB_RUN_ATTEMPT}" >> ci-evidence/commit.txt
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: photoduel-debug-apk
+          path: apps/photoduel/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload UNSIGNED release AAB (not for Play, no signing key was used)
+        uses: actions/upload-artifact@v4
+        with:
+          name: photoduel-release-aab-UNSIGNED
+          path: |
+            apps/photoduel/build/outputs/bundle/release/*.aab
+            ci-evidence/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload evidence and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: photoduel-android-evidence
+          path: |
+            ci-evidence
+            apps/photoduel/build/reports
+            apps/photoduel/build/test-results
+            apps/photoduel/build/outputs/mapping/release/mapping.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+  instrumented:
+    name: Instrumented tests (API 34 emulator, NON-BLOCKING until green evidence exists)
+    needs: [core-jvm, backend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # Non-blocking for the first release. See the header of this file.
+    continue-on-error: true
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: photoduel
+          POSTGRES_PASSWORD: photoduel-ci-only
+          POSTGRES_DB: photoduel_journey
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U photoduel -d photoduel_journey"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgres://photoduel:photoduel-ci-only@localhost:5432/photoduel_journey
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/photoduel/backend/package-lock.json
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Enable KVM for hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Build the backend and apply migrations
+        working-directory: apps/photoduel/backend
+        run: |
+          npm ci
+          npm run build
+          npm run migrate
+
+      # The journey test must move server time forward (windows are at least one hour). The backend takes
+      # every rule time from Date.now() (src/lib/clock.ts), so this CI-only preload shifts Date.now() and
+      # opens a loopback control port. It is generated here, is never part of the product, and does
+      # nothing unless the entry point is server.js.
+      - name: Write the CI-only clock control preload
+        run: |
+          cat > "${RUNNER_TEMP}/photoduel-clock-control.mjs" <<'JS'
+          import http from 'node:http';
+
+          const entry = process.argv[1] ?? '';
+          if (entry.endsWith('server.js')) {
+            const realNow = Date.now.bind(Date);
+            let offsetMs = 0;
+            Date.now = () => realNow() + offsetMs;
+            const port = Number(process.env.PHOTODUEL_CLOCK_CONTROL_PORT ?? '8788');
+            const send = (res, status, body) => {
+              res.writeHead(status, { 'content-type': 'application/json' });
+              res.end(JSON.stringify(body));
+            };
+            http
+              .createServer((req, res) => {
+                if (req.method === 'GET' && req.url === '/clock') {
+                  return send(res, 200, { offsetSeconds: offsetMs / 1000, serverTimeEpochMillis: Date.now() });
+                }
+                if (req.method === 'POST' && req.url === '/advance') {
+                  let raw = '';
+                  req.on('data', (chunk) => {
+                    raw += chunk;
+                    if (raw.length > 1024) req.destroy();
+                  });
+                  req.on('end', () => {
+                    try {
+                      const { seconds } = JSON.parse(raw || '{}');
+                      if (!Number.isInteger(seconds) || seconds < 0 || seconds > 31536000) {
+                        return send(res, 400, { error: 'seconds must be an integer from 0 to 31536000' });
+                      }
+                      offsetMs += seconds * 1000;
+                      return send(res, 200, { offsetSeconds: offsetMs / 1000, serverTimeEpochMillis: Date.now() });
+                    } catch {
+                      return send(res, 400, { error: 'body must be JSON like {"seconds":3700}' });
+                    }
+                  });
+                  return;
+                }
+                return send(res, 404, { error: 'not found' });
+              })
+              .listen(port, '127.0.0.1');
+          }
+          JS
+
+      - name: Start the backend (API on 8787, clock control on 8788, loopback only)
+        working-directory: apps/photoduel/backend
+        env:
+          NODE_OPTIONS: --import ${{ runner.temp }}/photoduel-clock-control.mjs
+          NODE_ENV: test
+          HOST: 127.0.0.1
+          PORT: '8787'
+          MEDIA_ROOT: ${{ runner.temp }}/photoduel-media
+          GUESTS_PER_IP_PER_HOUR: '1000'
+          LOG_LEVEL: info
+          PHOTODUEL_CLOCK_CONTROL_PORT: '8788'
+        run: |
+          nohup npm start > "${RUNNER_TEMP}/photoduel-backend.log" 2>&1 &
+          echo $! > "${RUNNER_TEMP}/photoduel-backend.pid"
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8787/v1/health > /dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8787/v1/health || { cat "${RUNNER_TEMP}/photoduel-backend.log"; exit 1; }
+          echo
+          curl -fsS http://127.0.0.1:8788/clock || { cat "${RUNNER_TEMP}/photoduel-backend.log"; exit 1; }
+          echo
+
+      - name: Run connected tests on an API 34 x86_64 emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          script: ./gradlew :apps:photoduel:connectedDebugAndroidTest --console=plain --stacktrace
+
+      - name: Stop the backend
+        if: always()
+        run: |
+          if [ -f "${RUNNER_TEMP}/photoduel-backend.pid" ]; then kill "$(cat "${RUNNER_TEMP}/photoduel-backend.pid")" 2>/dev/null || true; fi
+
+      - name: Upload instrumented reports and the backend log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: photoduel-instrumented-reports
+          path: |
+            apps/photoduel/build/reports/androidTests
+            apps/photoduel/build/outputs/androidTest-results
+            ${{ runner.temp }}/photoduel-backend.log
+          if-no-files-found: warn
+          retention-days: 14

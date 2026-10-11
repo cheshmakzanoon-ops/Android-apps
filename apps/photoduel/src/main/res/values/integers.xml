@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Type sizes (sp), line heights (sp) and motion durations (ms). Integers are used instead of dimens so
+  Compose can apply .sp without double-applying the font scale. Names match the Figma ANDROID syntax.
+  Type family: the platform default (Roboto on most devices). No font file is bundled.
+-->
+<resources>
+    <integer name="pd_type_display_size">34</integer>
+    <integer name="pd_type_display_line">42</integer>
+    <integer name="pd_type_headline_size">24</integer>
+    <integer name="pd_type_headline_line">32</integer>
+    <integer name="pd_type_title_size">20</integer>
+    <integer name="pd_type_title_line">28</integer>
+    <integer name="pd_type_body_size">16</integer>
+    <integer name="pd_type_body_line">24</integer>
+    <integer name="pd_type_body_strong_size">16</integer>
+    <integer name="pd_type_body_strong_line">24</integer>
+    <integer name="pd_type_label_size">14</integer>
+    <integer name="pd_type_label_line">20</integer>
+    <integer name="pd_type_caption_size">12</integer>
+    <integer name="pd_type_caption_line">16</integer>
+    <integer name="pd_type_countdown_size">28</integer>
+    <integer name="pd_type_countdown_line">36</integer>
+
+    <integer name="pd_motion_instant_ms">100</integer>
+    <integer name="pd_motion_short_ms">150</integer>
+    <integer name="pd_motion_medium_ms">250</integer>
+    <integer name="pd_motion_long_ms">400</integer>
+    <integer name="pd_motion_reveal_ms">900</integer>
+</resources>

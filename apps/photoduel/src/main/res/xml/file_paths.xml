@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The only directory the FileProvider can share: cacheDir/camera. It holds one photo at a time, written
+  by the system camera app and deleted as soon as the photo has been processed (CameraCache).
+  The content URI's first path segment is the name below.
+-->
+<paths>
+    <cache-path
+        name="camera"
+        path="camera/" />
+</paths>

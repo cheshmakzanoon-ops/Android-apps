@@ -1,0 +1,31 @@
+{
+  "name": "photoduel-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Authoritative PhotoDuel API: rooms, challenges, submissions, ballots and media authorization.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0 <23"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/server.js",
+    "migrate": "node dist/src/migrateCli.js",
+    "worker": "node dist/src/workerCli.js",
+    "mod": "node dist/src/cli/mod.js",
+    "test": "node --test --test-concurrency=4 \"dist/test/unit/**/*.test.js\" \"dist/test/security/**/*.test.js\"",
+    "test:e2e": "node --test --test-concurrency=1 \"dist/test/e2e/**/*.test.js\""
+  },
+  "dependencies": {
+    "@fastify/multipart": "10.1.3",
+    "fastify": "5.12.5",
+    "pg": "8.23.1",
+    "sharp": "0.35.5",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/pg": "8.23.1",
+    "typescript": "7.0.2"
+  }
+}

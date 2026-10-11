@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PhotoDuel launcher icon, monochrome layer for Android 13+ themed icons: the same two cards, windows cut out. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:pivotX="41"
+        android:pivotY="54"
+        android:rotation="-10">
+        <path
+            android:fillColor="#000000"
+            android:fillType="evenOdd"
+            android:pathData="M31,35 H51 Q55,35 55,39 V69 Q55,73 51,73 H31 Q27,73 27,69 V39 Q27,35 31,35 Z M30,38 H52 V60 H30 Z" />
+    </group>
+    <group
+        android:pivotX="67"
+        android:pivotY="54"
+        android:rotation="8">
+        <path
+            android:fillColor="#000000"
+            android:fillType="evenOdd"
+            android:pathData="M57,35 H77 Q81,35 81,39 V69 Q81,73 77,73 H57 Q53,73 53,69 V39 Q53,35 57,35 Z M56,38 H78 V60 H56 Z"
+            android:strokeColor="#00000000"
+            android:strokeWidth="0" />
+    </group>
+</vector>
