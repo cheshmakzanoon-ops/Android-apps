@@ -20,7 +20,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.agency.stickerjet.app.AppContainer
-import com.agency.stickerjet.app.uiPorts
 import com.agency.stickerjet.ui.editor.EditorScreen
 import com.agency.stickerjet.ui.editor.EditorViewModel
 import com.agency.stickerjet.ui.importing.ImportRoute
