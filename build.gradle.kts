@@ -1,12 +1,6 @@
-// Root project: shared conventions only. Plugin versions live in gradle/libs.versions.toml and are
-// applied per module, so an unrelated JVM-only task never configures the Android module.
-plugins {
-    alias(libs.plugins.kotlin.android) apply false
-    alias(libs.plugins.kotlin.compose) apply false
-    alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.kotlin.serialization) apply false
-}
-
+// Root project: shared conventions only. Kotlin and AGP plugins are applied directly by each module
+// with their own alias. Declaring them here with `apply false` breaks Android configuration, which
+// StickerJet's CI showed (KotlinAndroidTarget could not be decorated; see the StickerJet history).
 tasks.register("clean", Delete::class) {
     delete(rootProject.layout.buildDirectory)
 }
