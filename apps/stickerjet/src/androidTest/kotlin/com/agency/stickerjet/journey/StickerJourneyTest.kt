@@ -60,8 +60,8 @@ import java.util.concurrent.TimeUnit
  * clearly visible person, so that the segmentation path runs. The test asserts subjectFrames only
  * as a conditional (see below), so a clip with no person still tests the fallback.
  *
- * The journey writes its export to `files/journey-output/journey-export.webp` on success. CI reads
- * that file with `adb exec-out run-as` and checks it with tools/verify_animated_webp.py.
+ * On success the journey publishes its export to `Download/journey-output/journey-export.webp` through
+ * MediaStore. CI pulls that file with `adb` and checks it with tools/verify_animated_webp.py.
  *
  * NOT covered here (each is a QA row in docs/qa-test-plan.md, or out of scope):
  * - Recipient apps and messengers: the chooser is resolved, but no receiver is driven and no
@@ -312,10 +312,25 @@ class StickerJourneyTest {
         return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 
-    /** Leaves the export where CI can read it with run-as. Debug builds are debuggable. */
+    /**
+     * Publishes the export to shared Downloads through MediaStore, so CI can `adb pull` it after Gradle
+     * has uninstalled the app. A file in the app's own directory would be unreachable by then.
+     */
     private fun keepForCi(exported: File) {
-        val dir = File(context.filesDir, JOURNEY_OUTPUT_DIR).apply { mkdirs() }
-        exported.copyTo(File(dir, JOURNEY_OUTPUT_NAME), overwrite = true)
+        val resolver = context.contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, JOURNEY_OUTPUT_NAME)
+            put(MediaStore.Downloads.MIME_TYPE, "image/webp")
+            put(MediaStore.Downloads.RELATIVE_PATH, "Download/$JOURNEY_OUTPUT_DIR")
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
+        }
+        val uri = checkNotNull(resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)) {
+            "MediaStore refused the journey output"
+        }
+        checkNotNull(resolver.openOutputStream(uri)) { "MediaStore gave no output stream" }.use { out ->
+            exported.inputStream().use { input -> input.copyTo(out) }
+        }
+        resolver.update(uri, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null)
     }
 
     @Suppress("DEPRECATION")

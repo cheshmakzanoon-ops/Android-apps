@@ -183,8 +183,8 @@ jobs:
             out="${RUNNER_TEMP:-/tmp}/journey-output";
             mkdir -p "$out";
             adb=$(command -v adb || echo "$ANDROID_HOME/platform-tools/adb");
-            "$adb" exec-out run-as com.agency.stickerjet cat files/journey-output/journey-export.webp > "$out/journey-export.webp" 2>/dev/null;
-            if [ "$(head -c 4 "$out/journey-export.webp" 2>/dev/null)" != "RIFF" ]; then rm -f "$out/journey-export.webp"; fi;
+            "$adb" pull /sdcard/Download/journey-output/journey-export.webp "$out/journey-export.webp" >/dev/null 2>&1 || rm -f "$out/journey-export.webp";
+            if [ -f "$out/journey-export.webp" ] && [ "$(head -c 4 "$out/journey-export.webp")" != "RIFF" ]; then rm -f "$out/journey-export.webp"; fi;
             exit $rc
       - name: Upload instrumented test reports
         if: always()
@@ -201,8 +201,8 @@ jobs:
         run: |
           export_file="${RUNNER_TEMP}/journey-output/journey-export.webp"
           if [ ! -s "$export_file" ]; then
-            echo "The journey left no export behind; nothing to verify."
-            exit 0
+            echo "FAIL: the journey did not leave an export to verify."
+            exit 1
           fi
           test -f apps/stickerjet/tools/verify_animated_webp.py || { echo "verify_animated_webp.py is missing (SJ-D4 deliverable)"; exit 1; }
           python -m pip install --quiet "Pillow==12.3.0"
