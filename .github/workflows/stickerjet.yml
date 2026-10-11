@@ -183,7 +183,8 @@ jobs:
             out="${RUNNER_TEMP:-/tmp}/journey-output";
             mkdir -p "$out";
             adb=$(command -v adb || echo "$ANDROID_HOME/platform-tools/adb");
-            "$adb" exec-out run-as com.agency.stickerjet cat files/journey-output/journey-export.webp > "$out/journey-export.webp" 2>/dev/null || rm -f "$out/journey-export.webp";
+            "$adb" exec-out run-as com.agency.stickerjet cat files/journey-output/journey-export.webp > "$out/journey-export.webp" 2>/dev/null;
+            if [ "$(head -c 4 "$out/journey-export.webp" 2>/dev/null)" != "RIFF" ]; then rm -f "$out/journey-export.webp"; fi;
             exit $rc
       - name: Upload instrumented test reports
         if: always()
