@@ -125,19 +125,21 @@ fun RecentExportCard(
             color = colors.onSurfaceVariant,
         )
         if (export.fileExists) {
+            val openLabel = stringResource(R.string.action_open)
+            val shareLabel = stringResource(R.string.action_share)
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                 StickerTextButton(
-                    text = stringResource(R.string.action_open),
+                    text = openLabel,
                     onClick = onOpen,
                     modifier = Modifier.semantics {
-                        contentDescription = "${stringResource(R.string.action_open)}: ${export.projectTitle}"
+                        contentDescription = "$openLabel: ${export.projectTitle}"
                     },
                 )
                 StickerTextButton(
-                    text = stringResource(R.string.action_share),
+                    text = shareLabel,
                     onClick = onShare,
                     modifier = Modifier.semantics {
-                        contentDescription = "${stringResource(R.string.action_share)}: ${export.projectTitle}"
+                        contentDescription = "$shareLabel: ${export.projectTitle}"
                     },
                 )
             }

@@ -87,7 +87,8 @@ fun PreviewTab(
 @Composable
 private fun PreviewLoop(loop: LoopState.Ready<Bitmap>, removing: Boolean) {
     val images: List<ImageBitmap> = remember(loop.frames) { loop.frames.map { it.asImageBitmap() } }
-    var playing by remember(loop.frames) { mutableStateOf(!StickerTheme.reducedMotion) }
+    val reducedMotion = StickerTheme.reducedMotion
+    var playing by remember(loop.frames) { mutableStateOf(!reducedMotion) }
     val loopMs = loop.durationsMs.sum().toLong()
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
         LoopPlayer(

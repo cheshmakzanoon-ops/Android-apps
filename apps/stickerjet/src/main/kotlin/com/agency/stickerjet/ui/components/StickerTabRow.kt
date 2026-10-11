@@ -5,9 +5,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.agency.stickerjet.ui.theme.TouchTarget
@@ -29,14 +27,6 @@ fun StickerTabRow(
         modifier = modifier,
         containerColor = colors.background,
         contentColor = colors.onBackground,
-        indicator = { positions ->
-            if (selected in positions.indices) {
-                TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier.tabIndicatorOffset(positions[selected]),
-                    color = colors.onBackground,
-                )
-            }
-        },
         divider = { HorizontalDivider(color = colors.outlineVariant) },
     ) {
         titles.forEachIndexed { index, title ->
