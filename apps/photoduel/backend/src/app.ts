@@ -44,7 +44,6 @@ export async function buildApp(deps: AppDeps, opts: BuildOptions = {}): Promise<
     logger: loggerOptions(deps.config.logLevel, opts.logStream),
     bodyLimit: deps.config.limits.jsonBodyLimitBytes,
     trustProxy: deps.config.trustProxy,
-    disableRequestLogging: false,
     return503OnClosing: true,
     routerOptions: { ignoreTrailingSlash: false, maxParamLength: 128 },
   });

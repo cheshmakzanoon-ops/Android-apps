@@ -5,9 +5,13 @@ import com.agency.photoduel.domain.model.ErrorCode
 import com.agency.photoduel.domain.model.PhotoDuelError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -42,8 +46,21 @@ class NetworkStatus {
     private val _offline = MutableStateFlow(false)
     val offline: StateFlow<Boolean> = _offline.asStateFlow()
 
+    private val _sessionRejected = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+
+    /**
+     * Emits when a call came back UNAUTHENTICATED (expired, revoked or suspended session, or a wrong
+     * recovery code). The root passes it to [AppSessionState.onSessionRejected], which signs out only
+     * when someone was signed in.
+     */
+    val sessionRejected: SharedFlow<Unit> = _sessionRejected.asSharedFlow()
+
     fun <T> track(result: AppResult<T>): AppResult<T> {
         _offline.value = result is AppResult.Failure && result.error.isConnectivity()
+        if (result is AppResult.Failure && result.error.code == ErrorCode.UNAUTHENTICATED) _sessionRejected.tryEmit(Unit)
         return result
     }
 }

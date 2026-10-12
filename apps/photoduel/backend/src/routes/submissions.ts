@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import { activeMembership, blockedEitherWay } from '../access.js';
+import { activeMembership, blockedEitherWay, lockLiveCaller } from '../access.js';
 import { callerOf } from '../auth.js';
 import type { AppDeps } from '../deps.js';
 import { advanceLocked, deleteObjects, ensureAdvanced, lockChallenge, purgeMediaIds, type ChallengeRow } from '../lifecycle.js';
@@ -93,6 +93,7 @@ export function submissionRoutes(app: FastifyInstance, deps: AppDeps): void {
     let outcome: { submissionId: string; created: boolean; purge: string[] };
     try {
       outcome = await withTx(deps.pool, async (tx) => {
+        await lockLiveCaller(tx, caller.userId);
         const now = deps.clock.now();
         const locked = await lockChallenge(tx, challengeId);
         if (!locked) throw notFound();
@@ -225,6 +226,7 @@ export function submissionRoutes(app: FastifyInstance, deps: AppDeps): void {
     );
 
     const { status, ballot, purge } = await withTx(deps.pool, async (tx) => {
+      await lockLiveCaller(tx, caller.userId);
       const now = deps.clock.now();
       const locked = await lockChallenge(tx, challengeId);
       if (!locked) throw notFound();

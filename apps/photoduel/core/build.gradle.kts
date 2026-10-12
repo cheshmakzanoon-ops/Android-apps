@@ -17,6 +17,7 @@ sourceSets {
             appRoot.resolve("main/kotlin/com/agency/photoduel/domain"),
             appRoot.resolve("main/kotlin/com/agency/photoduel/data/remote"),
             appRoot.resolve("main/kotlin/com/agency/photoduel/engine/pure"),
+            appRoot.resolve("main/kotlin/com/agency/photoduel/ui/state"),
         )
     }
     test {
@@ -24,6 +25,7 @@ sourceSets {
             appRoot.resolve("test/kotlin/com/agency/photoduel/domain"),
             appRoot.resolve("test/kotlin/com/agency/photoduel/data/remote"),
             appRoot.resolve("test/kotlin/com/agency/photoduel/engine/pure"),
+            appRoot.resolve("test/kotlin/com/agency/photoduel/ui/state"),
         )
     }
 }

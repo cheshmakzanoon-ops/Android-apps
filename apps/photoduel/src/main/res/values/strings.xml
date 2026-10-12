@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PhotoDuel user-facing text (English). Owned by the UI lane (PD-D1). Plain, short sentences; no jargon.
+  Names in placeholders come from the server and are shown as they are.
+-->
+<resources>
+    <string name="app_name">PhotoDuel</string>
+
+    <!-- Common actions and states -->
+    <string name="action_back">Back</string>
+    <string name="action_retry">Try again</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_done">Done</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_more">More options</string>
+    <string name="action_keep">Keep it</string>
+    <string name="action_leave">Leave</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_replace">Replace</string>
+    <string name="action_withdraw">Withdraw</string>
+    <string name="action_delete_account">Delete account</string>
+    <string name="state_working">Working</string>
+    <string name="loading">Loading…</string>
+    <string name="offline_banner">You’re offline. Reconnecting…</string>
+    <string name="stale_content">This may be out of date. Refresh to try again.</string>
+    <string name="photo_loading">Loading photo…</string>
+    <string name="photo_unavailable">Photo unavailable</string>
+    <string name="photo_viewer_close">Close photo</string>
+    <string name="photo_by_cd">Photo by %1$s</string>
+    <string name="my_photo_cd">Your submitted photo</string>
+    <string name="photo_report">Report photo</string>
+
+    <!-- Errors. Server messages are never shown; each code has its own sentence. -->
+    <string name="error_title">Something went wrong</string>
+    <string name="error_validation">Some details weren’t accepted. Check them and try again.</string>
+    <string name="error_unauthenticated">Your session has ended. Sign in again to continue.</string>
+    <string name="error_forbidden">Only the room owner can do that.</string>
+    <string name="error_not_found">This isn’t available. It may have been deleted, or you may no longer be a member.</string>
+    <string name="error_invite_unavailable">This invitation link doesn’t work any more. Ask someone in the room for a new one.</string>
+    <string name="error_conflict">That can’t be done right now. Refresh and try again.</string>
+    <string name="error_invalid_transition">The challenge has already moved on. Refresh to see where it is now.</string>
+    <string name="error_already_voted">You’ve already voted in this challenge. Votes can’t be changed.</string>
+    <string name="error_roster_frozen">Nobody can leave or be removed while a challenge is running.</string>
+    <string name="error_room_full">This room is full.</string>
+    <string name="error_deadline_passed">The deadline has passed.</string>
+    <string name="error_payload_too_large">This photo is too large to upload. Try another photo.</string>
+    <string name="error_unsupported_media">This photo can’t be used. Choose a JPEG, PNG or WebP photo that is at least 200 pixels on its short side.</string>
+    <string name="error_invalid_ballot">You can’t vote for this photo.</string>
+    <string name="error_rate_limited">Too many attempts. Try again later.</string>
+    <plurals name="error_rate_limited_minutes">
+        <item quantity="one">Too many attempts. Try again in %d minute.</item>
+        <item quantity="other">Too many attempts. Try again in %d minutes.</item>
+    </plurals>
+    <string name="error_server">Something went wrong on the server. Try again in a moment.</string>
+    <string name="error_network">No connection. Check your internet and try again.</string>
+    <string name="error_timeout">The server took too long to answer. Try again.</string>
+    <string name="error_unknown">Something went wrong.</string>
+    <string name="error_invalid_recovery_code">That recovery code doesn’t match an account.</string>
+    <string name="error_reconnecting_title">Reconnecting…</string>
+    <string name="error_reconnecting_body">We’ll keep trying while the app is open.</string>
+
+    <!-- App start -->
+    <string name="setup_title">Not connected to a server</string>
+    <string name="setup_body">This build of PhotoDuel has no PhotoDuel server set up, so you can’t sign in or play yet. Nothing is shown that isn’t real: rooms and photos appear once the app is connected to a server.</string>
+    <string name="checking_session">Checking your session…</string>
+    <string name="session_error_title">Couldn’t check your session</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_start">Get started</string>
+    <string name="onboarding_page_indicator">Page %1$d of %2$d</string>
+    <string name="onboarding_1_title">Photo duels with friends</string>
+    <string name="onboarding_1_body">Make a private room for 3 to 8 friends. Only people in the room ever see its photos.</string>
+    <string name="onboarding_2_title">One prompt, one photo each</string>
+    <string name="onboarding_2_body">The owner picks a prompt and a time limit. Everyone submits one photo and can replace it until the deadline.</string>
+    <string name="onboarding_3_title">Vote once, then see who won</string>
+    <string name="onboarding_3_body">When submissions close, everyone votes for one photo that isn’t their own. Votes are secret and final. A tie means the win is shared.</string>
+
+    <!-- Sign in and restore -->
+    <string name="signin_title">Welcome to PhotoDuel</string>
+    <string name="signin_body">Pick a name your friends will recognise. No email or phone number needed.</string>
+    <string name="signin_name_label">Your name</string>
+    <string name="signin_name_support">Letters, numbers, spaces and - _ . (up to %1$d characters)</string>
+    <string name="name_problem_empty">Enter a name.</string>
+    <string name="name_problem_too_long">Use %1$d characters or fewer.</string>
+    <string name="name_problem_illegal">Use only letters, numbers, spaces and - _ .</string>
+    <string name="room_name_problem_illegal">The name has a character that isn’t allowed.</string>
+    <string name="signin_guest_button">Continue as guest</string>
+    <string name="signin_have_code">I have a recovery code</string>
+    <string name="signin_new_guest">Start as a new guest instead</string>
+    <string name="signin_restore_title">Restore your account</string>
+    <string name="signin_restore_body">Enter the recovery code you saved. Restoring signs you in here and replaces the code with a new one.</string>
+    <string name="signin_code_label">Recovery code</string>
+    <string name="signin_code_invalid">A recovery code has 16 letters and numbers, like ABCD-EFGH-JKMN-PQRS.</string>
+    <string name="signin_restore_button">Restore account</string>
+    <string name="signin_limitation">Your account lives on this device. Create a recovery code in your profile, or you lose this account if you lose the device.</string>
+    <string name="restore_new_code_title">Save your new recovery code</string>
+    <string name="restore_new_code_body">Your old code no longer works. This new code is shown only once. Write it down or keep it somewhere safe.</string>
+    <string name="restore_code_not_issued_title">Your old code no longer works</string>
+    <string name="restore_code_not_issued_body">You’re signed in, but a new recovery code couldn’t be created right now. Create one in your profile soon.</string>
+    <string name="recovery_saved_button">I’ve saved it</string>
+
+    <!-- Home -->
+    <string name="home_title">Your rooms</string>
+    <string name="home_create_room">New room</string>
+    <string name="home_join_link">Join with a link</string>
+    <string name="home_empty_title">No rooms yet</string>
+    <string name="home_empty_body">Create a room and invite friends, or open an invitation link someone sent you.</string>
+    <string name="home_history">History</string>
+    <string name="home_profile">Profile</string>
+    <string name="home_settings">Settings</string>
+    <string name="room_members_of">%1$d of %2$d members</string>
+    <string name="room_no_challenge">No challenge running</string>
+    <string name="join_dialog_title">Join with an invitation</string>
+    <string name="join_dialog_label">Invitation link</string>
+    <string name="join_dialog_invalid">That isn’t an invitation link. It starts with photoduel://invite/</string>
+    <string name="join_dialog_button">Open invitation</string>
+
+    <!-- Challenge states and outcomes -->
+    <string name="state_created">Waiting to start</string>
+    <string name="state_open">Submissions open</string>
+    <string name="state_voting">Voting open</string>
+    <string name="state_completed">Results are in</string>
+    <string name="state_archived">Archived</string>
+    <string name="state_cancelled">Cancelled</string>
+    <string name="outcome_winner">Winner</string>
+    <string name="outcome_tie">Tie</string>
+    <string name="outcome_insufficient_submissions">Not enough photos</string>
+    <string name="outcome_insufficient_ballots">Not enough votes</string>
+
+    <!-- Durations -->
+    <plurals name="duration_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="ttl_one_day">1 day</string>
+    <string name="ttl_three_days">3 days</string>
+    <string name="ttl_one_week">1 week</string>
+
+    <!-- Countdown -->
+    <string name="countdown_submissions">Submissions close in</string>
+    <string name="countdown_voting">Voting closes in</string>
+    <string name="countdown_ended">Time’s up. Waiting for the server…</string>
+    <string name="countdown_a11y_submission">Submissions close in %1$s</string>
+    <string name="countdown_a11y_voting">Voting closes in %1$s</string>
+
+    <!-- Create room -->
+    <string name="create_room_title">New room</string>
+    <string name="create_room_label">Room name</string>
+    <string name="create_room_support">Up to %1$d characters. Everyone in the room sees it.</string>
+    <string name="create_room_button">Create room</string>
+    <string name="create_room_capacity_note">A room holds up to 8 people, including you. A challenge needs at least 3.</string>
+
+    <!-- Room -->
+    <string name="room_title_loading">Room</string>
+    <string name="room_challenge_header">Challenge</string>
+    <string name="room_challenge_none_owner">No challenge yet. Pick a prompt to set one up.</string>
+    <string name="room_challenge_none_member">No challenge yet. The owner sets one up.</string>
+    <string name="room_new_challenge">New challenge</string>
+    <string name="room_rematch">Rematch</string>
+    <string name="room_open_challenge">Open challenge</string>
+    <string name="room_see_results">See results</string>
+    <string name="room_start_challenge">Start challenge</string>
+    <string name="room_start_needs_members">A challenge needs at least %1$d members to start. Invite more friends.</string>
+    <string name="room_cancel_challenge">Cancel challenge</string>
+    <string name="room_round">Round %1$d</string>
+    <string name="room_invite_header">Invite friends</string>
+    <string name="room_invite_body">Create a link and send it to friends. Anyone with the link can join until it expires or the room is full.</string>
+    <string name="room_full_note">The room is full, so no one else can join.</string>
+    <string name="room_invite_ttl_label">Link expires after</string>
+    <string name="room_invite_create">Create invitation link</string>
+    <string name="room_invite_created">Link created. It’s shown only now, so share it before you leave this screen.</string>
+    <string name="room_invite_expires">Expires %1$s</string>
+    <string name="room_invite_share">Share link</string>
+    <string name="room_invite_revoke">Revoke link</string>
+    <string name="room_members_header">Members (%1$d of %2$d)</string>
+    <string name="room_member_you">%1$s (you)</string>
+    <string name="room_owner_label">Owner</string>
+    <string name="members_roster_frozen_hint">The player list is fixed while a challenge runs.</string>
+    <string name="member_more_cd">More options for %1$s</string>
+    <string name="member_report">Report</string>
+    <string name="member_block">Block</string>
+    <string name="room_remove_member">Remove %1$s</string>
+    <string name="room_leave">Leave room</string>
+    <string name="room_delete">Delete room</string>
+    <string name="confirm_leave_title">Leave this room?</string>
+    <string name="confirm_leave_body">You’ll stop seeing its photos and challenges. You can come back only with a new invitation.</string>
+    <string name="confirm_delete_room_title">Delete this room?</string>
+    <string name="confirm_delete_room_body">The room disappears for everyone now and its photos are removed within 24 hours. This can’t be undone.</string>
+    <string name="confirm_remove_title">Remove %1$s?</string>
+    <string name="confirm_remove_body">They’ll lose access to this room and its photos.</string>
+    <string name="confirm_cancel_challenge_title">Cancel this challenge?</string>
+    <string name="confirm_cancel_challenge_body">Submitted photos will be deleted. This can’t be undone.</string>
+
+    <!-- Create challenge and rematch -->
+    <string name="create_challenge_title">New challenge</string>
+    <string name="rematch_title">Rematch</string>
+    <string name="rematch_note">A new round with a fresh prompt. The last prompt isn’t preselected.</string>
+    <string name="create_challenge_prompt_header">Prompt</string>
+    <string name="create_challenge_submission_header">Time to submit photos</string>
+    <string name="create_challenge_voting_header">Time to vote</string>
+    <string name="create_challenge_note">The clock starts when you press Start challenge. Voting opens when submissions close.</string>
+    <string name="create_challenge_button">Create challenge</string>
+    <string name="prompts_empty">No prompts available</string>
+    <string name="prompts_empty_body">The prompt list is empty right now. Try again later.</string>
+
+    <!-- Invitation -->
+    <string name="invite_title">Invitation</string>
+    <string name="invite_join_heading">Join %1$s?</string>
+    <string name="invite_owner">Owner: %1$s</string>
+    <string name="invite_expires">This link expires %1$s</string>
+    <string name="invite_join_button">Join room</string>
+    <string name="invite_privacy_note">People in the room will see your name and the photos you submit.</string>
+    <string name="invite_invalid_title">This link doesn’t work</string>
+    <string name="invite_invalid_body">The invitation may have expired, been revoked or used up, or its room was deleted. Ask someone in the room for a new link.</string>
+    <string name="invite_go_home">Go to your rooms</string>
+
+    <!-- Challenge -->
+    <string name="challenge_title">Round %1$d</string>
+    <string name="challenge_title_loading">Challenge</string>
+    <string name="challenge_prompt_label">Prompt</string>
+    <string name="challenge_waiting_owner">Ready when you are. Starting fixes the player list and begins the submission window.</string>
+    <string name="challenge_waiting_member">Waiting for the owner to start the challenge.</string>
+    <string name="challenge_submit_body">Take or choose one photo for this prompt.</string>
+    <string name="challenge_submit_cta">Submit your photo</string>
+    <string name="challenge_submitted">Your photo is in. You can change or withdraw it until submissions close.</string>
+    <string name="challenge_change_photo">Change or withdraw</string>
+    <string name="challenge_vote_body">Submissions are closed. Pick your favourite photo that isn’t yours.</string>
+    <string name="challenge_vote_cta">Vote now</string>
+    <string name="challenge_vote_cast">Your vote is in. Results appear when voting closes.</string>
+    <string name="challenge_view_photos">View the photos</string>
+    <string name="challenge_results_cta">See results</string>
+    <string name="challenge_cancelled">This challenge was cancelled. Its photos are being deleted.</string>
+    <string name="challenge_archived">This challenge is archived. Its photos were removed after 30 days; the result is kept.</string>
+    <string name="challenge_watching">You’re not taking part in this challenge, because you joined after it started or its window has closed. You can follow it here and play in the next one.</string>
+    <string name="challenge_roster_header">Players (%1$d)</string>
+
+    <!-- Submission -->
+    <string name="submit_title">Your photo</string>
+    <string name="submit_choose">Choose a photo</string>
+    <string name="submit_choose_body">Pick one photo. Location and camera details are removed on your phone before upload.</string>
+    <string name="submit_preview_note">This is the photo you’ll submit.</string>
+    <string name="submit_use_photo">Submit this photo</string>
+    <string name="submit_choose_other">Choose a different photo</string>
+    <string name="prep_reading">Reading the photo…</string>
+    <string name="prep_decoding">Resizing…</string>
+    <string name="prep_encoding">Removing location and camera details…</string>
+    <string name="prep_done">Ready to upload</string>
+    <string name="submit_uploading">Uploading… %1$d%%</string>
+    <string name="submit_cancel">Cancel upload</string>
+    <string name="submit_failed_processing">This photo couldn’t be prepared on your phone. Try again or choose another photo.</string>
+    <string name="submit_done_title">Your photo is in</string>
+    <string name="submit_done_body">You can replace or withdraw it until submissions close.</string>
+    <string name="submit_replace">Replace photo</string>
+    <string name="submit_withdraw">Withdraw photo</string>
+    <string name="submit_keep_current">Keep current photo</string>
+    <string name="submit_replace_note">Your current photo stays until the new one is accepted.</string>
+    <string name="submit_closed">Submissions are closed for this challenge.</string>
+    <string name="confirm_withdraw_title">Withdraw your photo?</string>
+    <string name="confirm_withdraw_body">It will be deleted. You can submit another one before the deadline.</string>
+
+    <!-- Voting -->
+    <string name="vote_title">Vote</string>
+    <string name="vote_intro_title">How voting works</string>
+    <string name="vote_intro_1">Pick the one photo you like best.</string>
+    <string name="vote_intro_2">You can’t vote for your own photo.</string>
+    <string name="vote_intro_3">Your vote is secret and can’t be changed once you confirm it.</string>
+    <string name="vote_start">Start voting</string>
+    <string name="vote_select_hint">Tap a photo to select it. You can change your choice until you confirm.</string>
+    <string name="vote_confirm_prompt">Vote for %1$s’s photo? Votes are final.</string>
+    <string name="vote_confirm_button">Confirm vote</string>
+    <string name="vote_selected">Selected</string>
+    <string name="vote_your_vote">Your vote</string>
+    <string name="vote_your_photo">Your photo</string>
+    <string name="vote_own_photo_cd">Your photo. You can’t vote for it.</string>
+    <string name="vote_view_full_cd">View %1$s’s photo larger</string>
+    <string name="vote_done_body">Your vote is in. Results appear when voting closes.</string>
+    <string name="vote_you_voted_for">Your vote is in for %1$s’s photo. Results appear when voting closes.</string>
+    <string name="vote_unavailable_title">You can’t vote in this challenge</string>
+    <string name="vote_unavailable_body">Only players who were in the room when the challenge started can vote, and only while voting is open.</string>
+    <string name="vote_no_photos">There are no photos to vote on.</string>
+
+    <!-- Results -->
+    <string name="results_title">Results</string>
+    <string name="results_none">No result yet</string>
+    <string name="results_none_body">The server hasn’t published a result for this challenge.</string>
+    <string name="results_counting">Counting the votes…</string>
+    <string name="results_winner_heading">Winner</string>
+    <string name="results_tie_heading">It’s a tie</string>
+    <string name="results_tie_body">These %1$d photos share the win.</string>
+    <string name="results_no_winner_title">No winner this time</string>
+    <string name="results_insufficient_submissions_body">Fewer than 2 photos were submitted, so there was nothing to vote on.</string>
+    <string name="results_insufficient_ballots_body">Fewer than 2 votes were counted. The votes that were cast are shown below.</string>
+    <string name="results_tally_heading">Votes</string>
+    <string name="results_ballots">%1$d of %2$d players voted</string>
+    <string name="results_no_tally">No votes to show.</string>
+    <plurals name="results_votes">
+        <item quantity="one">%d vote</item>
+        <item quantity="other">%d votes</item>
+    </plurals>
+    <string name="results_photo_removed">Photo removed</string>
+    <string name="results_winner_cd">Winning photo by %1$s, %2$s</string>
+    <string name="results_winner_removed">The winning photo (%1$s) has been removed.</string>
+    <string name="results_row_a11y">%1$s: %2$s</string>
+    <string name="results_row_winner_a11y">%1$s: %2$s, winner</string>
+    <string name="results_delete_my_photo">Delete my photo</string>
+    <string name="results_photo_deleted">Your photo was deleted. The votes stay counted.</string>
+    <string name="results_rematch">Rematch</string>
+    <string name="results_back_to_room">Back to room</string>
+    <string name="confirm_delete_photo_title">Delete your photo?</string>
+    <string name="confirm_delete_photo_body">It’s removed for everyone. The votes stay counted.</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <string name="history_empty_title">No challenges yet</string>
+    <string name="history_empty_body">Challenges you play appear here.</string>
+    <string name="history_item_round">%1$s · Round %2$d</string>
+    <string name="history_you_submitted">You submitted a photo</string>
+    <string name="history_you_did_not_submit">You didn’t submit a photo</string>
+    <string name="history_load_more">Load more</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_name_label">Name</string>
+    <string name="profile_rename">Change name</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_recovery_header">Recovery code</string>
+    <string name="profile_recovery_has">You have a recovery code. Creating a new one replaces it.</string>
+    <string name="profile_recovery_none">You don’t have a recovery code yet. Without one, losing this device means losing this account.</string>
+    <string name="profile_recovery_create">Create recovery code</string>
+    <string name="profile_recovery_new">Create a new code</string>
+    <string name="confirm_replace_code_title">Replace your recovery code?</string>
+    <string name="confirm_replace_code_body">Your current code will stop working.</string>
+    <string name="recovery_dialog_title">Your recovery code</string>
+    <string name="recovery_dialog_body">This code is shown only once. Write it down or keep it somewhere safe. Anyone with it can sign in as you.</string>
+    <string name="profile_settings">Settings and privacy</string>
+    <string name="profile_blocked">Blocked people</string>
+    <string name="profile_sign_out">Sign out</string>
+    <string name="profile_sign_out_note">To sign back in on this device, you’ll need your recovery code.</string>
+    <string name="profile_delete">Delete account</string>
+    <string name="delete_dialog_title">Delete your account?</string>
+    <string name="delete_dialog_body">Your photos are deleted right away and you leave every room. Rooms you own are deleted. Your past votes stay counted without your name. This can’t be undone.</string>
+    <string name="delete_dialog_label">Type %1$s to confirm</string>
+
+    <!-- Settings and guidelines -->
+    <string name="settings_title">Settings and privacy</string>
+    <string name="settings_preferences_header">Preferences</string>
+    <string name="settings_notifications">Challenge reminders</string>
+    <string name="settings_notifications_unavailable">Not available in this version. PhotoDuel doesn’t send notifications yet, so this stays off.</string>
+    <string name="settings_unavailable_state">Off, not available</string>
+    <string name="settings_motion">Animations</string>
+    <string name="settings_motion_reduced">Reduced. Your device’s Remove animations setting is on, so results appear without animation.</string>
+    <string name="settings_motion_full">On. Turn on Remove animations in your device’s accessibility settings to reduce motion.</string>
+    <string name="settings_server_not_configured">This build isn’t connected to a PhotoDuel server.</string>
+    <string name="settings_guidelines_header">Guidelines</string>
+    <string name="settings_safety_header">Safety</string>
+    <string name="settings_blocked">Blocked people</string>
+    <string name="guideline_community">Community guidelines</string>
+    <string name="guideline_privacy">Privacy</string>
+    <string name="guideline_voting">How voting and results work</string>
+    <string name="guideline_community_body">PhotoDuel is for small groups of friends. Share photos you took yourself and that fit the prompt.\n\nDon’t post nudity, violence, hate, or photos of people who didn’t agree to be in them. Don’t harass or bully anyone.\n\nIf something feels wrong, report the photo or the person from the menu next to it. Reports are reviewed, and the person you report isn’t told who reported them. You can also block someone: you won’t see each other’s photos and can’t vote for each other.\n\nA photo reported by 3 different people is hidden until it has been reviewed.</string>
+    <string name="guideline_privacy_body">PhotoDuel doesn’t ask for your email, phone number or real name. Your account is a guest account with the name you chose.\n\nBefore a photo leaves your phone, the app resizes it and removes location and camera details. The server does the same again.\n\nOnly members of a room can see its photos, and only after voting opens. Photos are deleted 30 days after a challenge ends, and within 24 hours when a challenge is cancelled or a room is deleted.\n\nDeleting your account removes your photos at once and takes you out of every room. Votes you cast stay counted without your name.</string>
+    <string name="guideline_voting_body">Everyone on the player list submits one photo. You can replace or withdraw it until submissions close.\n\nWhen submissions close, each player votes once for a photo that isn’t their own. Votes are secret and can’t be changed.\n\nWhen voting closes, the server counts the votes. The photo with the most votes wins. If photos share the most votes, they all win: there is no hidden tie-break.\n\nIf fewer than 2 photos were submitted, or fewer than 2 votes were counted, there is no winner. Deadlines come from the server’s clock, not your phone’s.</string>
+
+    <!-- Safety -->
+    <string name="report_title_photo">Report this photo</string>
+    <string name="report_title_user">Report %1$s</string>
+    <string name="report_note">Choose a reason. The person won’t see who reported them.</string>
+    <string name="report_reason_inappropriate">Inappropriate or explicit</string>
+    <string name="report_reason_harassment">Harassment or bullying</string>
+    <string name="report_reason_privacy">Shares someone’s private information</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_not_prompt">Not a photo for this prompt</string>
+    <string name="report_reason_other">Something else</string>
+    <string name="report_details_label">Details (optional)</string>
+    <string name="report_details_count">%1$d of %2$d characters</string>
+    <string name="report_send">Send report</string>
+    <string name="report_sent_title">Thanks for reporting</string>
+    <string name="report_sent_body">Reports are reviewed. The person you reported isn’t told who reported them.</string>
+    <string name="block_title">Block %1$s?</string>
+    <string name="block_body">You won’t see each other’s photos, and you can’t vote for each other. They stay in your shared rooms and aren’t told you blocked them.</string>
+    <string name="block_confirm">Block</string>
+    <string name="block_done">%1$s is blocked. You can unblock them in Settings.</string>
+    <string name="blocked_title">Blocked people</string>
+    <string name="blocked_empty_title">You haven’t blocked anyone</string>
+    <string name="blocked_empty_body">People you block appear here.</string>
+    <string name="blocked_unblock">Unblock</string>
+    <string name="blocked_unblock_cd">Unblock %1$s</string>
+</resources>

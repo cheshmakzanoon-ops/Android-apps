@@ -1,6 +1,23 @@
 import type { Queryable } from './lib/db.js';
+import { ApiError } from './lib/errors.js';
 
 export const DELETED_PLAYER = 'Deleted player';
+
+/**
+ * First statement of every transaction that writes rows owned by the caller (photos, ballots,
+ * memberships, invitations). Locks the caller's user row FOR SHARE and confirms the account is
+ * neither deleted nor suspended. Account deletion locks the same row FOR UPDATE (and suspension
+ * updates it), so the two serialize: either this write commits first and the deletion then purges
+ * or anonymises it, or the deletion commits first and this write sees a dead account (401).
+ * Taking it before any room or challenge lock keeps one lock order with deleteAccount.
+ */
+export async function lockLiveCaller(q: Queryable, userId: string): Promise<void> {
+  const { rowCount } = await q.query(
+    'SELECT 1 FROM users WHERE id = $1 AND deleted_at IS NULL AND suspended_at IS NULL FOR SHARE',
+    [userId],
+  );
+  if ((rowCount ?? 0) === 0) throw new ApiError('UNAUTHENTICATED', 'Session is invalid or expired');
+}
 
 export interface Membership {
   roomId: string;

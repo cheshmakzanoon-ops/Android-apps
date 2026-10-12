@@ -61,8 +61,12 @@ test('an applied migration that was edited is refused (forward-only, checksummed
 });
 
 test('votes cannot hold two ballots for one live voter (database constraint)', async () => {
+  // Scoped to this file's schema: other test files migrate their own schemas concurrently.
   const c = await pool.query(
-    `SELECT conname FROM pg_constraint WHERE conname = 'votes_one_per_voter' AND contype = 'u'`,
+    `SELECT c.conname FROM pg_constraint c JOIN pg_namespace n ON n.oid = c.connamespace
+      WHERE c.conname = 'votes_one_per_voter' AND c.contype = 'u' AND n.nspname = $1
+        AND c.conrelid = 'votes'::regclass`,
+    [schema],
   );
   assert.equal(c.rowCount, 1);
   const pk = await pool.query(

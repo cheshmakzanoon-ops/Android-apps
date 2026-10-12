@@ -5,6 +5,7 @@ import com.agency.photoduel.domain.model.ChallengeOutcome
 import com.agency.photoduel.domain.model.ChallengeView
 import com.agency.photoduel.domain.model.PhotoDuelError
 import com.agency.photoduel.domain.model.Submission
+import com.agency.photoduel.domain.model.SubmissionStatus
 import com.agency.photoduel.domain.port.PhotoDuelService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +40,8 @@ object ResultsModelBuilder {
     /** Builds the model from the server's result only. Returns null when the server has not published one. */
     fun build(view: ChallengeView): ResultsModel? {
         val result = view.result ?: return null
-        val byId = view.submissions.associateBy { it.id }
+        // Only ACTIVE photos can be shown. The author still receives their own REMOVED row from the server.
+        val byId = view.submissions.filter { it.status == SubmissionStatus.ACTIVE }.associateBy { it.id }
         val maxVotes = result.tallies.maxOfOrNull { it.votes } ?: 0
         val winnerIds = if (result.outcome == ChallengeOutcome.WINNER || result.outcome == ChallengeOutcome.TIE) {
             result.coWinnerSubmissionIds.toSet()

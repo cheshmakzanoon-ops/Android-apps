@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { activeMembership } from '../access.js';
+import { activeMembership, lockLiveCaller } from '../access.js';
 import { softDeleteRoom } from '../accountDeletion.js';
 import { callerOf } from '../auth.js';
 import type { AppDeps } from '../deps.js';
@@ -208,6 +208,7 @@ export function roomRoutes(app: FastifyInstance, deps: AppDeps): void {
     const token = newOpaqueToken();
     const now = deps.clock.now();
     const created = await withTx(deps.pool, async (tx) => {
+      await lockLiveCaller(tx, caller.userId);
       const { room } = await lockRoomForMember(tx, roomId, caller.userId);
       const members = await memberCount(tx, roomId);
       if (members >= room.capacity) throw new ApiError('ROOM_FULL', 'The room is full');
@@ -316,10 +317,11 @@ export function roomRoutes(app: FastifyInstance, deps: AppDeps): void {
     if (!OPAQUE_TOKEN_RE.test(token)) throw inviteUnavailable();
     const hash = sha256(token);
     const roomId = await withTx(deps.pool, async (tx) => {
+      // Lock order: caller, room, then invitation. The use counter changes only under all three.
+      await lockLiveCaller(tx, caller.userId);
       const found = await tx.query<{ room_id: string }>('SELECT room_id FROM invitations WHERE token_hash = $1', [hash]);
       const roomIdFound = found.rows[0]?.room_id;
       if (!roomIdFound) throw inviteUnavailable();
-      // Lock order: room, then invitation. The use counter changes only under both locks.
       const room = await tx.query<{ id: string; capacity: number }>(
         'SELECT id, capacity FROM rooms WHERE id = $1 AND deleted_at IS NULL FOR UPDATE',
         [roomIdFound],

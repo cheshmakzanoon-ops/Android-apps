@@ -78,6 +78,22 @@ class AppSessionState(
         }
     }
 
+    /**
+     * The server refused the session on some call (401). The data layer has already dropped the token,
+     * so a signed-in user goes back to sign-in. In any other phase this changes nothing: a wrong recovery
+     * code on the sign-in screen also answers 401.
+     */
+    fun onSessionRejected() {
+        _state.update {
+            if (it.phase == AppPhase.SIGNED_IN) it.copy(phase = AppPhase.SIGNED_OUT, user = null, error = null) else it
+        }
+    }
+
+    /** Called when another screen (the profile) already ran the logout call. */
+    fun onSignedOut() {
+        _state.update { it.copy(phase = AppPhase.SIGNED_OUT, user = null, error = null) }
+    }
+
     /** Called after account deletion succeeded; the session is already revoked on the server. */
     fun onAccountDeleted() {
         _state.update { it.copy(phase = AppPhase.SIGNED_OUT, user = null) }
